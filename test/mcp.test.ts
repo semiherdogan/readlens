@@ -1,0 +1,55 @@
+import { Client } from "@modelcontextprotocol/client";
+import { InMemoryTransport } from "@modelcontextprotocol/server";
+import { describe, expect, it, vi } from "vitest";
+
+import { createCleanWebMcpServer } from "../src/mcp/server.js";
+import type { ReadPageResult } from "../src/core/types.js";
+
+const pageResult: ReadPageResult = {
+  url: "https://example.com/",
+  finalUrl: "https://example.com/",
+  title: "Example",
+  author: null,
+  siteName: null,
+  description: null,
+  content: "Clean content",
+  language: "en",
+  publishedAt: null,
+  wordCount: 2,
+  characterCount: 13,
+  extractionMethod: "readability",
+  confidence: 0.9,
+  truncated: false
+};
+
+describe("createCleanWebMcpServer", () => {
+  it("exposes only read_page and returns structured content", async () => {
+    const readPage = vi.fn().mockResolvedValue(pageResult);
+    const server = createCleanWebMcpServer(readPage);
+    const client = new Client({ name: "cleanweb-test", version: "1.0.0" });
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    try {
+      const tools = await client.listTools();
+      expect(tools.tools.map(({ name }) => name)).toEqual(["read_page"]);
+
+      const result = await client.callTool({
+        name: "read_page",
+        arguments: { url: "https://example.com" }
+      });
+      expect(readPage).toHaveBeenCalledWith({
+        url: "https://example.com",
+        format: "text",
+        render: "auto",
+        maxChars: 30_000
+      });
+      expect(result.structuredContent).toEqual(pageResult);
+    } finally {
+      await client.close();
+      await server.close();
+    }
+  });
+});
