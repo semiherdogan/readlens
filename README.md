@@ -1,12 +1,12 @@
 <p align="center">
-  <img src="assets/pagenectar-cover.jpg" alt="PageNectar: Extract the nectar from any page">
+  <img src="assets/pagenectar-cover.jpg" alt="PageNectar: Clean web content for AI agents">
 </p>
 
 # PageNectar
 
 PageNectar is a local web content gateway for AI agents. It fetches a URL, extracts the readable main content, removes common page chrome, and returns a small structured result instead of a raw DOM.
 
-> Extract the nectar from any page.
+> Clean web content for AI agents.
 
 ## Status
 

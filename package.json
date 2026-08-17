@@ -1,7 +1,7 @@
 {
   "name": "pagenectar",
   "version": "0.1.0",
-  "description": "A local web reader for AI agents that returns content, not webpages.",
+  "description": "Clean web content for AI agents.",
   "keywords": [
     "ai",
     "content-extraction",
