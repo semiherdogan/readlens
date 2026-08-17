@@ -2,6 +2,7 @@ import { parseArgs } from "node:util";
 
 import type { AppOptions } from "../app.js";
 import type { ReadPage, RenderMode } from "../core/types.js";
+import { errorPayload } from "../core/errors.js";
 
 type CliDependencies = {
   createReader: (options: AppOptions) => ReadPage;
@@ -12,11 +13,12 @@ type CliDependencies = {
 
 const USAGE = `Usage:
   cleanweb read <url> [--json] [--render auto|always|never] [--max-chars 30000]
-  cleanweb mcp [--allow-private]
+  cleanweb mcp [--allow-private] [--no-cache] [--cache-ttl 3600]
 `;
 
 function messageFrom(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
+  const payload = errorPayload(error);
+  return `[${payload.code}] ${payload.message}`;
 }
 
 function parseRender(value: string | undefined): RenderMode {
@@ -30,6 +32,15 @@ function parseMaxChars(value: string | undefined): number {
   const parsed = Number(value);
   if (!Number.isInteger(parsed) || parsed < 1 || parsed > 1_000_000) {
     throw new Error("max-chars must be an integer between 1 and 1000000");
+  }
+  return parsed;
+}
+
+function parseCacheTtl(value: string | undefined): number {
+  if (!value) return 3600;
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < 1 || parsed > 604_800) {
+    throw new Error("cache-ttl must be an integer between 1 and 604800 seconds");
   }
   return parsed;
 }
@@ -57,13 +68,17 @@ export async function runCli(args: string[], dependencies: CliDependencies): Pro
         render: { type: "string" },
         "max-chars": { type: "string" },
         "allow-private": { type: "boolean", default: false },
-        lightpanda: { type: "string" }
+        lightpanda: { type: "string" },
+        "no-cache": { type: "boolean", default: false },
+        "cache-ttl": { type: "string" }
       }
     });
 
     const readPage = dependencies.createReader({
       allowPrivateNetwork: values["allow-private"],
-      lightpandaExecutable: values.lightpanda
+      lightpandaExecutable: values.lightpanda,
+      cacheEnabled: !values["no-cache"],
+      cacheTtlMs: parseCacheTtl(values["cache-ttl"]) * 1000
     });
 
     if (command === "mcp") {
@@ -74,13 +89,13 @@ export async function runCli(args: string[], dependencies: CliDependencies): Pro
 
     const [url, ...extraPositionals] = positionals;
     if (!url || extraPositionals.length > 0) throw new Error("read requires exactly one URL");
-    if (values.format && values.format !== "text") {
-      throw new Error("Only text output is supported in v0.1");
+    if (values.format && values.format !== "text" && values.format !== "markdown") {
+      throw new Error("format must be text or markdown");
     }
 
     const result = await readPage({
       url,
-      format: "text",
+      format: values.format === "markdown" ? "markdown" : "text",
       render: parseRender(values.render),
       maxChars: parseMaxChars(values["max-chars"])
     });

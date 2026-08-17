@@ -1,5 +1,5 @@
 export type RenderMode = "auto" | "always" | "never";
-export type OutputFormat = "text";
+export type OutputFormat = "text" | "markdown";
 
 export type ExtractionMethod =
   | "readability"
@@ -51,4 +51,9 @@ export interface PageFetcher {
 
 export interface AlternatePageFetcher extends PageFetcher {
   supports(url: URL): boolean;
+}
+
+export interface PageCache {
+  get(key: string): Promise<ReadPageResult | undefined>;
+  set(key: string, value: ReadPageResult, ttlMs: number): Promise<void>;
 }

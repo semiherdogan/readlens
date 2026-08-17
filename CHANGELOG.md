@@ -1,0 +1,23 @@
+# Changelog
+
+All notable changes to CleanWeb will be documented in this file.
+
+## Unreleased
+
+### Added
+
+- File cache with configurable TTL
+- Markdown output
+- Typed CLI and MCP errors
+- Medium author-feed fallback
+- GitHub Actions verification workflow
+- HTTP-first Core Reader with Lightpanda fallback
+- Mozilla Readability and structural extraction fallbacks
+- Plain-text CLI output and JSON diagnostics
+- Local stdio MCP server with one `read_page` tool
+- Private-network and redirect validation
+
+### Changed
+
+- Ad containers are removed using structural class and data-attribute signals
+- Bot-block pages are rejected instead of returned as readable content

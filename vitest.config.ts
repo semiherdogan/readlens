@@ -4,6 +4,8 @@ export default defineConfig({
   test: {
     coverage: {
       provider: "v8",
+      include: ["src/**/*.ts"],
+      exclude: ["src/cli/index.ts"],
       reporter: ["text", "json-summary"],
       thresholds: {
         branches: 100,

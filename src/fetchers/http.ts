@@ -1,5 +1,6 @@
 import { validatePublicUrl } from "../core/security.js";
 import type { FetchedPage, PageFetcher } from "../core/types.js";
+import { CleanWebError } from "../core/errors.js";
 
 type FetchFunction = (input: URL, init: RequestInit) => Promise<Response>;
 
@@ -17,7 +18,7 @@ const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
 async function readLimited(response: Response, maxBytes: number): Promise<string> {
   const declaredLength = Number(response.headers.get("content-length"));
   if (Number.isFinite(declaredLength) && declaredLength > maxBytes) {
-    throw new Error(`Response exceeds ${maxBytes} bytes`);
+    throw new CleanWebError("RESPONSE_TOO_LARGE", `Response exceeds ${maxBytes} bytes`);
   }
   if (!response.body) return "";
 
@@ -32,7 +33,7 @@ async function readLimited(response: Response, maxBytes: number): Promise<string
     size += value.byteLength;
     if (size > maxBytes) {
       await reader.cancel();
-      throw new Error(`Response exceeds ${maxBytes} bytes`);
+      throw new CleanWebError("RESPONSE_TOO_LARGE", `Response exceeds ${maxBytes} bytes`);
     }
     text += decoder.decode(value, { stream: true });
   }
@@ -57,28 +58,50 @@ export function createHttpFetcher(options: HttpFetcherOptions = {}): PageFetcher
 
       let redirectCount = 0;
       while (true) {
-        const response = await fetchFunction(url, {
-          headers: {
-            accept: acceptedContentTypes.join(","),
-            "user-agent": "CleanWeb/0.1"
-          },
-          redirect: "manual",
-          signal: AbortSignal.timeout(timeoutMs)
-        });
+        let response: Response;
+        try {
+          response = await fetchFunction(url, {
+            headers: {
+              accept: acceptedContentTypes.join(","),
+              "user-agent": "CleanWeb/0.1"
+            },
+            redirect: "manual",
+            signal: AbortSignal.timeout(timeoutMs)
+          });
+        } catch (error) {
+          if (error instanceof Error && error.name === "TimeoutError") {
+            throw new CleanWebError("FETCH_TIMEOUT", `Request timed out after ${timeoutMs} ms`, {
+              cause: error
+            });
+          }
+          throw new CleanWebError("FETCH_FAILED", "HTTP request failed", { cause: error });
+        }
 
         if (REDIRECT_STATUSES.has(response.status)) {
           const location = response.headers.get("location");
-          if (!location) throw new Error("Redirect response has no location header");
-          if (redirectCount === maxRedirects) throw new Error("Too many redirects");
+          if (!location) {
+            throw new CleanWebError("REDIRECT_ERROR", "Redirect response has no location header");
+          }
+          if (redirectCount === maxRedirects) {
+            throw new CleanWebError("REDIRECT_ERROR", "Too many redirects");
+          }
           url = await validateUrl(new URL(location, url).href);
           redirectCount += 1;
           continue;
         }
 
-        if (!response.ok) throw new Error(`HTTP request failed with status ${response.status}`);
+        if (!response.ok) {
+          throw new CleanWebError(
+            "HTTP_STATUS",
+            `HTTP request failed with status ${response.status}`
+          );
+        }
         const contentType = response.headers.get("content-type")?.toLowerCase() ?? "";
         if (!acceptedContentTypes.some((type) => contentType.includes(type))) {
-          throw new Error(`Unsupported content type: ${contentType || "unknown"}`);
+          throw new CleanWebError(
+            "UNSUPPORTED_CONTENT_TYPE",
+            `Unsupported content type: ${contentType || "unknown"}`
+          );
         }
 
         return {

@@ -1,8 +1,19 @@
+import { readFileSync } from "node:fs";
+
 import { describe, expect, it } from "vitest";
 
 import { extractContent } from "../src/extractors/extract.js";
 
 describe("extractContent", () => {
+  it("removes structurally identified ad containers without filtering article words", () => {
+    const html = readFileSync(new URL("./fixtures/bigpara-ad.html", import.meta.url), "utf8");
+
+    const result = extractContent(html, "https://example.com/news");
+
+    expect(result.content).not.toContain("REKLAM");
+    expect(result.content).toContain("Reklamcılık sektörü");
+  });
+
   it("returns readable article text without page chrome", () => {
     const html = `<!doctype html>
       <html lang="en">
@@ -53,7 +64,7 @@ describe("extractContent", () => {
   it("uses text density and body text fallbacks", () => {
     const denseText = "dense ".repeat(16).trim();
     const dense = extractContent(
-      `<html><body><div>${denseText}<a href="/x">link</a></div></body></html>`,
+      `<html><body><div><div>${denseText}<a href="/x">link</a></div></div></body></html>`,
       "https://example.com"
     );
     const body = extractContent("<html><body><p>Tiny text</p></body></html>", "https://example.com");
@@ -86,5 +97,47 @@ describe("extractContent", () => {
         "https://example.com"
       ).confidence
     ).toBeCloseTo(0.95);
+  });
+
+  it("preserves semantic article structures in Markdown format", () => {
+    const html = `<html><body><article>
+      <h1>Guide</h1>
+      <p>Read the <a href="/docs"><strong>documentation</strong></a>.</p>
+      <p><b>Bold</b> and <i>italic</i><br><a>plain link</a>
+      <img><img src="/image.png"></p>
+      <figure><img src="/figure.png" alt="Diagram"><figcaption>A diagram</figcaption></figure>
+      <h2>Steps</h2><ul><li>Install</li><li>Run <code>cleanweb</code></li></ul>
+      <ol><li>First</li></ol>
+      <blockquote>Keep content focused.</blockquote>
+      <pre><code>cleanweb read URL</code></pre>
+      <!-- ignored -->
+      ${"Supporting content. ".repeat(10)}
+    </article></body></html>`;
+
+    const result = extractContent(html, "https://example.com/guide", "markdown");
+
+    expect(result.content).toContain("# Guide");
+    expect(result.content).toContain("[**documentation**](https://example.com/docs)");
+    expect(result.content).toContain("## Steps");
+    expect(result.content).toContain("- Run `cleanweb`");
+    expect(result.content).toContain("1. First");
+    expect(result.content).toContain("**Bold** and *italic*");
+    expect(result.content).toContain("plain link");
+    expect(result.content).toContain("![](https://example.com/image.png)");
+    expect(result.content).toContain(
+      "![Diagram](https://example.com/figure.png)_A diagram_"
+    );
+    expect(result.content).toContain("> Keep content focused.");
+    expect(result.content).toContain("```\ncleanweb read URL\n```");
+  });
+
+  it("ignores images without a source in Markdown fallback content", () => {
+    const result = extractContent(
+      "<html><body><main><img><p>Short content</p></main></body></html>",
+      "https://example.com",
+      "markdown"
+    );
+
+    expect(result.content).toBe("Short content");
   });
 });

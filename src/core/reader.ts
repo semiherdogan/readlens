@@ -1,9 +1,11 @@
 import { extractContent } from "../extractors/extract.js";
 import { validatePublicUrl } from "./security.js";
+import { CleanWebError } from "./errors.js";
 import type {
   AlternatePageFetcher,
   FetchedPage,
   PageFetcher,
+  PageCache,
   ReadPageInput,
   ReadPageResult,
   RenderMode
@@ -13,13 +15,25 @@ export type ReaderDependencies = {
   httpFetcher: PageFetcher;
   renderer?: PageFetcher;
   alternateFetchers?: AlternatePageFetcher[];
+  cache?: PageCache;
+  cacheTtlMs?: number;
   validateUrl?: (url: string) => Promise<URL>;
 };
 
 const DEFAULT_MAX_CHARS = 30_000;
+const DEFAULT_CACHE_TTL_MS = 60 * 60 * 1000;
+
+function cacheKey(url: URL, input: ReadPageInput, render: RenderMode, maxChars: number): string {
+  return JSON.stringify({
+    url: url.href,
+    format: input.format ?? "text",
+    render,
+    maxChars
+  });
+}
 
 function countWords(content: string): number {
-  return content ? content.split(/\s+/u).length : 0;
+  return content.split(/\s+/u).length;
 }
 
 function shouldRender(content: string): boolean {
@@ -31,9 +45,35 @@ async function fetchAuto(url: URL, dependencies: ReaderDependencies): Promise<Fe
     return await dependencies.httpFetcher.fetch(url);
   } catch (httpError) {
     const alternate = dependencies.alternateFetchers?.find((fetcher) => fetcher.supports(url));
-    if (alternate) return alternate.fetch(url);
+    if (alternate) {
+      try {
+        return await alternate.fetch(url);
+      } catch (error) {
+        if (!dependencies.renderer) {
+          throw new CleanWebError(
+            "ALTERNATE_SOURCE_FAILED",
+            "Alternate content source failed",
+            { cause: error }
+          );
+        }
+      }
+    }
     if (dependencies.renderer) return dependencies.renderer.fetch(url);
     throw httpError;
+  }
+}
+
+function assertUsefulContent(title: string | null, content: string): void {
+  const normalizedTitle = title?.toLowerCase() ?? "";
+  const normalizedContent = content.toLowerCase();
+  const blocked =
+    normalizedTitle.includes("you have been blocked") ||
+    normalizedTitle === "access denied" ||
+    normalizedTitle === "just a moment..." ||
+    normalizedContent.includes("cloudflare ray id");
+  if (blocked) throw new CleanWebError("BLOCKED", "The site returned a bot-block page");
+  if (!content.trim()) {
+    throw new CleanWebError("EXTRACTION_FAILED", "No readable content was extracted");
   }
 }
 
@@ -44,6 +84,16 @@ export function createReader(dependencies: ReaderDependencies) {
     const render: RenderMode = input.render ?? "auto";
     const maxChars = input.maxChars ?? DEFAULT_MAX_CHARS;
     const url = await validateUrl(input.url);
+    const key = cacheKey(url, input, render, maxChars);
+
+    if (dependencies.cache) {
+      try {
+        const cached = await dependencies.cache.get(key);
+        if (cached) return cached;
+      } catch {
+        // Reading a page must not depend on cache availability.
+      }
+    }
 
     let page: FetchedPage;
     if (render === "always") {
@@ -56,7 +106,7 @@ export function createReader(dependencies: ReaderDependencies) {
     }
 
     await validateUrl(page.finalUrl);
-    let extracted = extractContent(page.html, page.finalUrl);
+    let extracted = extractContent(page.html, page.finalUrl, input.format ?? "text");
 
     if (
       render === "auto" &&
@@ -66,13 +116,15 @@ export function createReader(dependencies: ReaderDependencies) {
     ) {
       page = await dependencies.renderer.fetch(url);
       await validateUrl(page.finalUrl);
-      extracted = extractContent(page.html, page.finalUrl);
+      extracted = extractContent(page.html, page.finalUrl, input.format ?? "text");
     }
+
+    assertUsefulContent(extracted.title, extracted.content);
 
     const truncated = extracted.content.length > maxChars;
     const content = truncated ? extracted.content.slice(0, maxChars).trimEnd() : extracted.content;
 
-    return {
+    const result: ReadPageResult = {
       ...extracted,
       url: url.href,
       finalUrl: page.finalUrl,
@@ -81,5 +133,17 @@ export function createReader(dependencies: ReaderDependencies) {
       characterCount: content.length,
       truncated
     };
+    if (dependencies.cache) {
+      try {
+        await dependencies.cache.set(
+          key,
+          result,
+          dependencies.cacheTtlMs ?? DEFAULT_CACHE_TTL_MS
+        );
+      } catch {
+        // Reading a page must not depend on cache availability.
+      }
+    }
+    return result;
   };
 }

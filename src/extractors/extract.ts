@@ -1,7 +1,7 @@
 import { Readability } from "@mozilla/readability";
 import { JSDOM } from "jsdom";
 
-import type { ExtractedContent, ExtractionMethod } from "../core/types.js";
+import type { ExtractedContent, ExtractionMethod, OutputFormat } from "../core/types.js";
 
 const NOISE_SELECTORS = [
   "nav",
@@ -16,14 +16,26 @@ const NOISE_SELECTORS = [
   "[class*='cookie']",
   "[class*='newsletter']",
   "[class*='advert']",
+  "[class~='ad']",
+  "[class^='ad-']",
+  "[class*=' ad-']",
+  "[class$='-ad']",
+  "[class*='-ad ']",
+  "[class~='adv']",
+  "[class^='adv-']",
+  "[class*=' adv-']",
+  "[class$='-adv']",
+  "[class*='-adv ']",
+  "[data-ad-slot]",
+  "[data-ad-unit]",
   "[class*='social-share']",
   "[id*='cookie']",
   "[id*='newsletter']",
   "[id*='advert']"
 ].join(",");
 
-function cleanText(value: string | null | undefined): string {
-  return (value ?? "")
+function cleanText(value: string): string {
+  return value
     .replace(/\r\n?/gu, "\n")
     .replace(/[\t\f\v ]+/gu, " ")
     .replace(/ *\n */gu, "\n")
@@ -38,7 +50,68 @@ function structuredText(root: DocumentFragment | Element | null): string {
   clone
     .querySelectorAll("p,h1,h2,h3,h4,h5,h6,li,pre,blockquote,dt,dd,td,th")
     .forEach((element) => element.append("\n\n"));
-  return cleanText(clone.textContent);
+  return cleanText(clone.textContent!);
+}
+
+function markdownChildren(element: Element, baseUrl: string): string {
+  return [...element.childNodes].map((node) => markdownNode(node, baseUrl)).join("");
+}
+
+function markdownNode(node: Node, baseUrl: string): string {
+  if (node.nodeType === node.TEXT_NODE) return node.textContent!.replace(/\s+/gu, " ");
+  if (node.nodeType !== node.ELEMENT_NODE) return "";
+
+  const element = node as Element;
+  const tag = element.tagName.toLowerCase();
+  const children = markdownChildren(element, baseUrl);
+
+  if (/^h[1-6]$/u.test(tag)) {
+    return `${"#".repeat(Number(tag[1]))} ${children.trim()}\n\n`;
+  }
+  if (tag === "p") return `${children.trim()}\n\n`;
+  if (tag === "br") return "\n";
+  if (tag === "strong" || tag === "b") return `**${children.trim()}**`;
+  if (tag === "em" || tag === "i") return `*${children.trim()}*`;
+  if (tag === "code" && element.parentElement?.tagName.toLowerCase() !== "pre") {
+    return `\`${element.textContent!}\``;
+  }
+  if (tag === "pre") return `\`\`\`\n${element.textContent!.trimEnd()}\n\`\`\`\n\n`;
+  if (tag === "blockquote") {
+    return `${children
+      .trim()
+      .split("\n")
+      .map((line) => `> ${line}`)
+      .join("\n")}\n\n`;
+  }
+  if (tag === "a") {
+    const href = element.getAttribute("href");
+    if (!href) return children;
+    return `[${children.trim()}](${new URL(href, baseUrl).href})`;
+  }
+  if (tag === "img") {
+    const source = element.getAttribute("src");
+    if (!source) return "";
+    return `![${element.getAttribute("alt") ?? ""}](${new URL(source, baseUrl).href})`;
+  }
+  if (tag === "figure") return `${children.trim()}\n\n`;
+  if (tag === "figcaption") return `_${children.trim()}_\n\n`;
+  if (tag === "li") return `- ${children.trim()}\n`;
+  if (tag === "ol") {
+    const items = [...element.children]
+      .map((item, index) => `${index + 1}. ${markdownChildren(item, baseUrl).trim()}\n`)
+      .join("");
+    return `${items.trimEnd()}\n\n`;
+  }
+  if (tag === "ul") return `${children.trimEnd()}\n\n`;
+  return children;
+}
+
+function htmlToMarkdown(html: string, url: string): string {
+  const document = new JSDOM(`<body>${html}</body>`, { url }).window.document;
+  return markdownChildren(document.body, url)
+    .replace(/[ \t]+\n/gu, "\n")
+    .replace(/\n{3,}/gu, "\n\n")
+    .trim();
 }
 
 function metadata(document: Document, name: string): string | null {
@@ -58,6 +131,7 @@ function propertyMetadata(document: Document, property: string): string | null {
 
 function fallbackContent(document: Document): {
   content: string;
+  html: string;
   method: ExtractionMethod;
 } {
   const selectors: Array<[string, ExtractionMethod]> = [
@@ -68,12 +142,14 @@ function fallbackContent(document: Document): {
 
   for (const [selector, method] of selectors) {
     const content = structuredText(document.querySelector(selector));
-    if (content) return { content, method };
+    const element = document.querySelector(selector);
+    if (content && element) return { content, html: element.outerHTML, method };
   }
 
   const candidates = [...document.body.querySelectorAll("div, section")]
     .map((element) => ({
       content: structuredText(element),
+      html: element.outerHTML,
       linkText: cleanText(
         [...element.querySelectorAll("a")].map((link) => link.textContent).join(" ")
       )
@@ -86,8 +162,14 @@ function fallbackContent(document: Document): {
     });
 
   const dense = candidates[0]?.content;
-  if (dense) return { content: dense, method: "text-density" };
-  return { content: structuredText(document.body), method: "body-text" };
+  if (dense) {
+    return { content: dense, html: candidates[0]!.html, method: "text-density" };
+  }
+  return {
+    content: structuredText(document.body),
+    html: document.body.innerHTML,
+    method: "body-text"
+  };
 }
 
 function confidence(method: ExtractionMethod, contentLength: number): number {
@@ -103,7 +185,11 @@ function confidence(method: ExtractionMethod, contentLength: number): number {
   return Math.max(0, Math.min(1, methodScore[method] + lengthAdjustment));
 }
 
-export function extractContent(html: string, url: string): ExtractedContent {
+export function extractContent(
+  html: string,
+  url: string,
+  format: OutputFormat = "text"
+): ExtractedContent {
   const dom = new JSDOM(html, { url });
   const { document } = dom.window;
   document.querySelectorAll(NOISE_SELECTORS).forEach((element) => element.remove());
@@ -114,8 +200,12 @@ export function extractContent(html: string, url: string): ExtractedContent {
     : "";
   const readableText = candidateText.length >= 120 ? candidateText : "";
   const fallback = readableText ? null : fallbackContent(document);
-  const content = readableText || fallback?.content || "";
-  const extractionMethod: ExtractionMethod = fallback?.method ?? "readability";
+  const sourceHtml = readableText ? article!.content! : fallback!.html;
+  const content =
+    format === "markdown"
+      ? htmlToMarkdown(sourceHtml, url)
+      : readableText || fallback!.content;
+  const extractionMethod: ExtractionMethod = fallback ? fallback.method : "readability";
   const publishedAt =
     propertyMetadata(document, "article:published_time") ||
     document.querySelector("time[datetime]")?.getAttribute("datetime")?.trim() ||

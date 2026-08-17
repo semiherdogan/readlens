@@ -131,4 +131,26 @@ describe("createHttpFetcher", () => {
       vi.unstubAllGlobals();
     }
   });
+
+  it("classifies timeout and generic fetch failures", async () => {
+    const timeout = new Error("timed out");
+    timeout.name = "TimeoutError";
+    const timeoutFetcher = createHttpFetcher({
+      fetch: vi.fn().mockRejectedValue(timeout),
+      validateUrl: async (url) => new URL(url),
+      timeoutMs: 25
+    });
+    const failedFetcher = createHttpFetcher({
+      fetch: vi.fn().mockRejectedValue("socket failed"),
+      validateUrl: async (url) => new URL(url)
+    });
+
+    await expect(timeoutFetcher.fetch(new URL("https://example.com"))).rejects.toMatchObject({
+      code: "FETCH_TIMEOUT",
+      message: "Request timed out after 25 ms"
+    });
+    await expect(failedFetcher.fetch(new URL("https://example.com"))).rejects.toMatchObject({
+      code: "FETCH_FAILED"
+    });
+  });
 });

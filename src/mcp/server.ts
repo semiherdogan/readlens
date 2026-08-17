@@ -2,10 +2,11 @@ import { McpServer } from "@modelcontextprotocol/server";
 import { z } from "zod";
 
 import type { ReadPage } from "../core/types.js";
+import { errorPayload } from "../core/errors.js";
 
 const inputSchema = z.object({
   url: z.url().describe("Public HTTP or HTTPS page URL"),
-  format: z.literal("text").default("text"),
+  format: z.enum(["text", "markdown"]).default("text"),
   render: z.enum(["auto", "always", "never"]).default("auto"),
   maxChars: z.int().min(1).max(1_000_000).default(30_000)
 });
@@ -53,11 +54,19 @@ export function createCleanWebMcpServer(readPage: ReadPage): McpServer {
       }
     },
     async (input) => {
-      const result = await readPage(input);
-      return {
-        content: [{ type: "text", text: JSON.stringify(result) }],
-        structuredContent: result
-      };
+      try {
+        const result = await readPage(input);
+        return {
+          content: [{ type: "text", text: JSON.stringify(result) }],
+          structuredContent: result
+        };
+      } catch (error) {
+        const payload = { error: errorPayload(error) };
+        return {
+          content: [{ type: "text", text: JSON.stringify(payload) }],
+          isError: true
+        };
+      }
     }
   );
 

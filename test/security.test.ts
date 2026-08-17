@@ -4,6 +4,7 @@ const { lookup } = vi.hoisted(() => ({ lookup: vi.fn() }));
 vi.mock("node:dns/promises", () => ({ lookup }));
 
 import { validatePublicUrl } from "../src/core/security.js";
+import { CleanWebError } from "../src/core/errors.js";
 
 describe("validatePublicUrl", () => {
   it("accepts public HTTP and HTTPS URLs", async () => {
@@ -29,7 +30,7 @@ describe("validatePublicUrl", () => {
     "http://[fd00::1]",
     "http://[::1]"
   ])("rejects unsafe URL %s", async (url) => {
-    await expect(validatePublicUrl(url)).rejects.toThrow("Private or unsupported URL");
+    await expect(validatePublicUrl(url)).rejects.toBeInstanceOf(CleanWebError);
   });
 
   it("uses DNS resolution and rejects hostnames with any private address", async () => {
@@ -39,12 +40,12 @@ describe("validatePublicUrl", () => {
     );
 
     const resolve = vi.fn().mockResolvedValue(["93.184.216.34", "10.0.0.1"]);
-    await expect(validatePublicUrl("https://mixed.example", { resolve })).rejects.toThrow(
-      "Private or unsupported URL"
-    );
+    await expect(
+      validatePublicUrl("https://mixed.example", { resolve })
+    ).rejects.toMatchObject({ code: "PRIVATE_NETWORK" });
     await expect(
       validatePublicUrl("https://empty.example", { resolve: async () => [] })
-    ).rejects.toThrow("Private or unsupported URL");
+    ).rejects.toMatchObject({ code: "PRIVATE_NETWORK" });
   });
 
   it("allows private addresses only when explicitly enabled", async () => {
@@ -56,7 +57,7 @@ describe("validatePublicUrl", () => {
   it.each(["not a url", "http://[::ffff:127.0.0.1]", "http://[fe80::1]"])(
     "rejects malformed or private address %s",
     async (url) => {
-      await expect(validatePublicUrl(url)).rejects.toThrow("Private or unsupported URL");
+      await expect(validatePublicUrl(url)).rejects.toBeInstanceOf(CleanWebError);
     }
   );
 
@@ -78,11 +79,20 @@ describe("validatePublicUrl", () => {
       validatePublicUrl("https://invalid-address.example", {
         resolve: async () => ["not-an-ip"]
       })
-    ).rejects.toThrow("Private or unsupported URL");
+    ).rejects.toMatchObject({ code: "PRIVATE_NETWORK" });
     await expect(
       validatePublicUrl("https://mapped.example", {
         resolve: async () => ["::ffff:127.0.0.1"]
       })
-    ).rejects.toThrow("Private or unsupported URL");
+    ).rejects.toMatchObject({ code: "PRIVATE_NETWORK" });
+  });
+
+  it("distinguishes invalid URLs from private network URLs", async () => {
+    await expect(validatePublicUrl("not a url")).rejects.toMatchObject({
+      code: "INVALID_URL"
+    });
+    await expect(validatePublicUrl("http://127.0.0.1")).rejects.toMatchObject({
+      code: "PRIVATE_NETWORK"
+    });
   });
 });

@@ -41,7 +41,9 @@ describe("runCli", () => {
     expect(exitCode).toBe(0);
     expect(createReader).toHaveBeenCalledWith({
       allowPrivateNetwork: false,
-      lightpandaExecutable: undefined
+      lightpandaExecutable: undefined,
+      cacheEnabled: true,
+      cacheTtlMs: 3_600_000
     });
     expect(readPage).toHaveBeenCalledWith({
       url: "https://example.com",
@@ -93,26 +95,56 @@ describe("runCli", () => {
   it("starts the MCP server", async () => {
     const readPage = vi.fn();
     const startMcp = vi.fn();
-    const exitCode = await runCli(["mcp", "--allow-private", "--lightpanda", "/bin/lp"], {
-      createReader: vi.fn(() => readPage),
+    const createReader = vi.fn(() => readPage);
+    const exitCode = await runCli(
+      ["mcp", "--allow-private", "--lightpanda", "/bin/lp", "--no-cache", "--cache-ttl", "900"],
+      {
+      createReader,
       startMcp,
       writeOut: vi.fn(),
       writeError: vi.fn()
-    });
+      }
+    );
 
     expect(exitCode).toBe(0);
+    expect(createReader).toHaveBeenCalledWith({
+      allowPrivateNetwork: true,
+      lightpandaExecutable: "/bin/lp",
+      cacheEnabled: false,
+      cacheTtlMs: 900_000
+    });
     expect(startMcp).toHaveBeenCalledWith(readPage);
+  });
+
+  it("passes Markdown format to the reader", async () => {
+    const readPage = vi.fn().mockResolvedValue(result);
+
+    const exitCode = await runCli(
+      ["read", "https://example.com", "--format", "markdown"],
+      {
+        createReader: () => readPage,
+        startMcp: vi.fn(),
+        writeOut: vi.fn(),
+        writeError: vi.fn()
+      }
+    );
+
+    expect(exitCode).toBe(0);
+    expect(readPage).toHaveBeenCalledWith(expect.objectContaining({ format: "markdown" }));
   });
 
   it.each([
     [["unknown"], "Unknown command: unknown"],
     [["read"], "read requires exactly one URL"],
     [["read", "one", "two"], "read requires exactly one URL"],
-    [["read", "https://example.com", "--format", "markdown"], "Only text output"],
+    [["read", "https://example.com", "--format", "html"], "format must be text or markdown"],
     [["read", "https://example.com", "--render", "sometimes"], "Invalid render mode"],
     [["read", "https://example.com", "--max-chars", "0"], "max-chars must be"],
     [["read", "https://example.com", "--max-chars", "1.5"], "max-chars must be"],
     [["read", "https://example.com", "--max-chars", "1000001"], "max-chars must be"],
+    [["read", "https://example.com", "--cache-ttl", "0"], "cache-ttl must be"],
+    [["read", "https://example.com", "--cache-ttl", "1.5"], "cache-ttl must be"],
+    [["read", "https://example.com", "--cache-ttl", "604801"], "cache-ttl must be"],
     [["read", "https://example.com", "--unknown"], "Unknown option"],
     [["mcp", "extra"], "mcp does not accept positional arguments"]
   ])("reports invalid arguments for %j", async (args, expected) => {

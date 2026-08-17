@@ -1,6 +1,7 @@
 import { execFile } from "node:child_process";
 
 import type { FetchedPage, PageFetcher } from "../core/types.js";
+import { CleanWebError } from "../core/errors.js";
 
 type RunOptions = {
   encoding: "utf8";
@@ -36,13 +37,15 @@ type LightpandaOutput = {
 };
 
 function parseOutput(stdout: string): LightpandaOutput {
-  if (!stdout.trim()) throw new Error("Lightpanda returned an empty document");
+  if (!stdout.trim()) {
+    throw new CleanWebError("RENDER_FAILED", "Lightpanda returned an empty document");
+  }
 
   let output: unknown;
   try {
     output = JSON.parse(stdout);
   } catch {
-    throw new Error("Lightpanda returned invalid JSON");
+    throw new CleanWebError("RENDER_FAILED", "Lightpanda returned invalid JSON");
   }
 
   if (
@@ -55,7 +58,7 @@ function parseOutput(stdout: string): LightpandaOutput {
     typeof output.http_status !== "number" ||
     typeof output.content !== "string"
   ) {
-    throw new Error("Lightpanda returned an invalid result");
+    throw new CleanWebError("RENDER_FAILED", "Lightpanda returned an invalid result");
   }
 
   return output as LightpandaOutput;
@@ -94,11 +97,18 @@ export function createLightpandaFetcher(options: LightpandaFetcherOptions = {}):
       ];
       if (blockPrivateNetworks) args.push("--block-private-networks");
 
-      const { stdout } = await run(executable, args, {
-        encoding: "utf8",
-        maxBuffer: 3_000_000,
-        timeout: timeoutMs
-      });
+      let stdout: string;
+      try {
+        ({ stdout } = await run(executable, args, {
+          encoding: "utf8",
+          maxBuffer: 3_000_000,
+          timeout: timeoutMs
+        }));
+      } catch (error) {
+        throw new CleanWebError("RENDER_FAILED", "Lightpanda execution failed", {
+          cause: error
+        });
+      }
       const output = parseOutput(stdout);
 
       return {

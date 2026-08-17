@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { createCleanWebMcpServer } from "../src/mcp/server.js";
 import type { ReadPageResult } from "../src/core/types.js";
+import { CleanWebError } from "../src/core/errors.js";
 
 const pageResult: ReadPageResult = {
   url: "https://example.com/",
@@ -47,6 +48,30 @@ describe("createCleanWebMcpServer", () => {
         maxChars: 30_000
       });
       expect(result.structuredContent).toEqual(pageResult);
+    } finally {
+      await client.close();
+      await server.close();
+    }
+  });
+
+  it("returns typed tool errors", async () => {
+    const server = createCleanWebMcpServer(
+      vi.fn().mockRejectedValue(new CleanWebError("BLOCKED", "Blocked page"))
+    );
+    const client = new Client({ name: "cleanweb-test", version: "1.0.0" });
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    try {
+      const response = await client.callTool({
+        name: "read_page",
+        arguments: { url: "https://example.com" }
+      });
+      expect(response.isError).toBe(true);
+      expect(JSON.parse(response.content[0]!.type === "text" ? response.content[0]!.text : "")).toEqual({
+        error: { code: "BLOCKED", message: "Blocked page" }
+      });
     } finally {
       await client.close();
       await server.close();
