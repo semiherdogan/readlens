@@ -24,48 +24,12 @@ CleanWeb is an early v0.1 implementation. It currently provides:
 - Node.js 22 or newer
 - [Lightpanda](https://lightpanda.io/) available on `PATH` for JavaScript-rendered pages
 
-CleanWeb can run without Lightpanda when `--render never` is used.
-Telemetry is disabled for Lightpanda processes started by CleanWeb.
+Lightpanda is optional when `--render never` is used. See the [installation guide](docs/installation.md) for Lightpanda, global npm, private GitHub, and development setup instructions.
 
-Install Lightpanda with Homebrew:
-
-```sh
-brew install lightpanda-io/browser/lightpanda
-```
-
-For other platforms and installation methods, see the [official Lightpanda installation guide](https://lightpanda.io/docs/quickstart).
-
-Verify the installation:
+## Quick start
 
 ```sh
-lightpanda version
-```
-
-If Lightpanda is installed outside `PATH`, provide the executable explicitly:
-
-```sh
-cleanweb read https://example.com/app --lightpanda /custom/path/lightpanda
-cleanweb mcp --lightpanda /custom/path/lightpanda
-```
-
-## Install for development
-
-```sh
-npm ci
-npm run build
-```
-
-Run the built CLI directly:
-
-```sh
-node dist/cli/index.js read https://example.com
-```
-
-Or expose the package binary locally:
-
-```sh
-npm link
-cleanweb read https://example.com
+npx -y cleanweb@latest read https://example.com
 ```
 
 ## CLI
@@ -115,24 +79,14 @@ Cache files are stored under `$XDG_CACHE_HOME/cleanweb` or `~/.cache/cleanweb`.
 
 ## MCP server
 
-Start the local stdio server:
+CleanWeb runs as a local stdio MCP server:
 
 ```sh
-cleanweb mcp
+codex mcp add cleanweb -- npx -y cleanweb@latest mcp
+claude mcp add cleanweb -- npx -y cleanweb@latest mcp
 ```
 
-Example MCP client configuration:
-
-```json
-{
-  "mcpServers": {
-    "cleanweb": {
-      "command": "cleanweb",
-      "args": ["mcp"]
-    }
-  }
-}
-```
+See the [MCP setup guide](docs/mcp.md) for Codex, Claude Code, Claude Desktop, OpenCode, JSON-based clients, and private GitHub usage.
 
 The server exposes one tool:
 
