@@ -25,7 +25,10 @@ describe("createLightpandaFetcher", () => {
         "--json",
         "--block-private-networks"
       ]),
-      expect.objectContaining({ timeout: 20_000 })
+      expect.objectContaining({
+        env: expect.objectContaining({ LIGHTPANDA_DISABLE_TELEMETRY: "true" }),
+        timeout: 20_000
+      })
     );
     expect(result).toEqual({
       finalUrl: "https://example.com/final",

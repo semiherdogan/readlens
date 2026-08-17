@@ -5,6 +5,7 @@ import { CleanWebError } from "../core/errors.js";
 
 type RunOptions = {
   encoding: "utf8";
+  env: NodeJS.ProcessEnv;
   maxBuffer: number;
   timeout: number;
 };
@@ -105,6 +106,7 @@ export function createLightpandaFetcher(options: LightpandaFetcherOptions = {}):
       try {
         ({ stdout } = await run(executable, args, {
           encoding: "utf8",
+          env: { ...process.env, LIGHTPANDA_DISABLE_TELEMETRY: "true" },
           maxBuffer: 3_000_000,
           timeout: timeoutMs
         }));

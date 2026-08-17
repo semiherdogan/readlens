@@ -25,6 +25,7 @@ CleanWeb is an early v0.1 implementation. It currently provides:
 - [Lightpanda](https://lightpanda.io/) available on `PATH` for JavaScript-rendered pages
 
 CleanWeb can run without Lightpanda when `--render never` is used.
+Telemetry is disabled for Lightpanda processes started by CleanWeb.
 
 Install Lightpanda with Homebrew:
 
