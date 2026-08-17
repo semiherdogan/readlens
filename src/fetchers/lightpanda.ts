@@ -36,6 +36,10 @@ type LightpandaOutput = {
   content: string;
 };
 
+function isExecutableMissing(error: unknown): boolean {
+  return error instanceof Error && "code" in error && error.code === "ENOENT";
+}
+
 function parseOutput(stdout: string): LightpandaOutput {
   if (!stdout.trim()) {
     throw new CleanWebError("RENDER_FAILED", "Lightpanda returned an empty document");
@@ -105,6 +109,14 @@ export function createLightpandaFetcher(options: LightpandaFetcherOptions = {}):
           timeout: timeoutMs
         }));
       } catch (error) {
+        if (isExecutableMissing(error)) {
+          const location = executable === "lightpanda" ? "on PATH" : `at ${executable}`;
+          throw new CleanWebError(
+            "LIGHTPANDA_NOT_FOUND",
+            `Lightpanda was not found ${location}. Install it from https://lightpanda.io/docs/quickstart, provide its executable with --lightpanda <path>, or use --render never.`,
+            { cause: error }
+          );
+        }
         throw new CleanWebError("RENDER_FAILED", "Lightpanda execution failed", {
           cause: error
         });

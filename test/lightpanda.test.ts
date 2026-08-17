@@ -82,9 +82,37 @@ describe("createLightpandaFetcher", () => {
     );
   });
 
-  it("propagates process execution failures", async () => {
+  it("explains how to install a missing Lightpanda executable", async () => {
     const fetcher = createLightpandaFetcher({ executable: "/cleanweb/missing" });
 
-    await expect(fetcher.fetch(new URL("https://example.com"))).rejects.toThrow();
+    await expect(fetcher.fetch(new URL("https://example.com"))).rejects.toMatchObject({
+      code: "LIGHTPANDA_NOT_FOUND",
+      message: expect.stringMatching(
+        /not found at \/cleanweb\/missing.*--lightpanda <path>.*--render never/u
+      )
+    });
+  });
+
+  it("reports when Lightpanda is missing from PATH", async () => {
+    const missingError = Object.assign(new Error("spawn lightpanda ENOENT"), { code: "ENOENT" });
+    const fetcher = createLightpandaFetcher({
+      run: vi.fn().mockRejectedValue(missingError)
+    });
+
+    await expect(fetcher.fetch(new URL("https://example.com"))).rejects.toMatchObject({
+      code: "LIGHTPANDA_NOT_FOUND",
+      message: expect.stringContaining("Lightpanda was not found on PATH")
+    });
+  });
+
+  it("reports other process execution failures", async () => {
+    const fetcher = createLightpandaFetcher({
+      run: vi.fn().mockRejectedValue(new Error("process crashed"))
+    });
+
+    await expect(fetcher.fetch(new URL("https://example.com"))).rejects.toMatchObject({
+      code: "RENDER_FAILED",
+      message: "Lightpanda execution failed"
+    });
   });
 });

@@ -26,6 +26,27 @@ CleanWeb is an early v0.1 implementation. It currently provides:
 
 CleanWeb can run without Lightpanda when `--render never` is used.
 
+Install Lightpanda with Homebrew:
+
+```sh
+brew install lightpanda-io/browser/lightpanda
+```
+
+For other platforms and installation methods, see the [official Lightpanda installation guide](https://lightpanda.io/docs/quickstart).
+
+Verify the installation:
+
+```sh
+lightpanda version
+```
+
+If Lightpanda is installed outside `PATH`, provide the executable explicitly:
+
+```sh
+cleanweb read https://example.com/app --lightpanda /custom/path/lightpanda
+cleanweb mcp --lightpanda /custom/path/lightpanda
+```
+
 ## Install for development
 
 ```sh
