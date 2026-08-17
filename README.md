@@ -28,7 +28,7 @@ PageNectar is an early v0.1 implementation. It currently provides:
 - Node.js 22 or newer
 - [Lightpanda](https://lightpanda.io/) available on `PATH` for JavaScript-rendered pages
 
-Lightpanda is optional when `--render never` is used. See the [installation guide](docs/installation.md) for Lightpanda, global npm, private GitHub, and development setup instructions.
+Lightpanda is optional when `--render never` is used. See the [installation guide](docs/installation.md) for Lightpanda, global npm, and development setup instructions.
 
 ## Quick start
 
@@ -90,7 +90,7 @@ codex mcp add pagenectar -- npx -y pagenectar@latest mcp
 claude mcp add pagenectar -- npx -y pagenectar@latest mcp
 ```
 
-See the [MCP setup guide](docs/mcp.md) for Codex, Claude Code, Claude Desktop, OpenCode, JSON-based clients, and private GitHub usage.
+See the [MCP setup guide](docs/mcp.md) for Codex, Claude Code, Claude Desktop, OpenCode, and JSON-based clients.
 
 The server exposes one tool:
 

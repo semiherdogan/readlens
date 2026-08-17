@@ -2,6 +2,14 @@
   "name": "pagenectar",
   "version": "0.1.0",
   "description": "Clean web content for AI agents.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/semiherdogan/pagenectar.git"
+  },
+  "homepage": "https://github.com/semiherdogan/pagenectar#readme",
+  "bugs": {
+    "url": "https://github.com/semiherdogan/pagenectar/issues"
+  },
   "keywords": [
     "ai",
     "content-extraction",
@@ -11,7 +19,7 @@
   ],
   "type": "module",
   "bin": {
-    "pagenectar": "./dist/cli/index.js"
+    "pagenectar": "dist/cli/index.js"
   },
   "exports": {
     ".": "./dist/index.js"
@@ -34,6 +42,10 @@
   },
   "engines": {
     "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "license": "MIT",
   "dependencies": {

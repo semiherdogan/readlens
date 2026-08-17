@@ -1,6 +1,6 @@
 # MCP setup
 
-PageNectar runs as a local stdio MCP server. For a published npm release, the launch command is:
+PageNectar runs as a local stdio MCP server. The launch command is:
 
 ```sh
 npx -y pagenectar@latest mcp
@@ -63,28 +63,6 @@ Run `opencode mcp list` to check the connection. See the [official OpenCode MCP 
 ```
 
 Restart the client after changing its configuration.
-
-## Private GitHub repository
-
-For temporary private-repository testing:
-
-```json
-{
-  "mcpServers": {
-    "pagenectar": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "--package=git+ssh://git@github.com/semiherdogan/pagenectar.git",
-        "pagenectar",
-        "mcp"
-      ]
-    }
-  }
-}
-```
-
-This requires GitHub SSH authentication to be available to the MCP client process. A published npm package avoids that requirement and starts faster from the npm cache.
 
 ## Custom Lightpanda path
 

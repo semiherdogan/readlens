@@ -9,7 +9,7 @@ PageNectar can run without Lightpanda when `--render never` is used. Telemetry i
 
 ## Run with npx
 
-After PageNectar is published to npm, run it without a permanent installation:
+Run PageNectar without a permanent installation:
 
 ```sh
 npx -y pagenectar@latest read https://example.com
@@ -46,16 +46,6 @@ If Lightpanda is installed outside `PATH`, provide the executable explicitly:
 pagenectar read https://example.com/app --lightpanda /custom/path/lightpanda
 pagenectar mcp --lightpanda /custom/path/lightpanda
 ```
-
-## Private GitHub repository
-
-Until the package is published, npm can install and run it from the private GitHub repository over SSH:
-
-```sh
-npx -y --package=git+ssh://git@github.com/semiherdogan/pagenectar.git pagenectar read https://example.com
-```
-
-The current user and the application starting PageNectar must have access to the repository through GitHub SSH authentication.
 
 ## Development setup
 
