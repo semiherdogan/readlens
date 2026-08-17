@@ -31,7 +31,7 @@ afterEach(async () => {
 
 describe("createFilePageCache", () => {
   it("stores values until their TTL expires", async () => {
-    const directory = await mkdtemp(join(tmpdir(), "cleanweb-cache-"));
+    const directory = await mkdtemp(join(tmpdir(), "pagenectar-cache-"));
     directories.push(directory);
     let now = 1000;
     const cache = createFilePageCache({ directory, now: () => now });
@@ -45,7 +45,7 @@ describe("createFilePageCache", () => {
   });
 
   it("ignores and removes invalid cache records", async () => {
-    const directory = await mkdtemp(join(tmpdir(), "cleanweb-cache-"));
+    const directory = await mkdtemp(join(tmpdir(), "pagenectar-cache-"));
     directories.push(directory);
     const cache = createFilePageCache({ directory });
     await cache.set("key", result, 1000);

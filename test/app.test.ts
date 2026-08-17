@@ -38,7 +38,7 @@ describe("createDefaultReader", () => {
       lightpandaExecutable: "/bin/lightpanda",
       cacheEnabled: true,
       cacheTtlMs: 5000,
-      cacheDirectory: "/tmp/cleanweb-cache"
+      cacheDirectory: "/tmp/pagenectar-cache"
     });
 
     expect(readPage).toBe(mocks.createReader.mock.results[0]!.value);
@@ -47,7 +47,7 @@ describe("createDefaultReader", () => {
       executable: "/bin/lightpanda"
     });
     expect(mocks.createFilePageCache).toHaveBeenCalledWith({
-      directory: "/tmp/cleanweb-cache"
+      directory: "/tmp/pagenectar-cache"
     });
     const dependencies = mocks.createReader.mock.calls[0]![0];
     expect(dependencies.cacheTtlMs).toBe(5000);
@@ -83,7 +83,7 @@ describe("createDefaultReader", () => {
     dependencies = mocks.createReader.mock.calls[1]![0];
     expect(dependencies.cache).toBeDefined();
     expect(mocks.createFilePageCache).toHaveBeenLastCalledWith({
-      directory: expect.stringContaining("/.cache/cleanweb")
+      directory: expect.stringContaining("/.cache/pagenectar")
     });
   });
 });

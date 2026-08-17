@@ -1,6 +1,6 @@
 import { extractContent } from "../extractors/extract.js";
 import { validatePublicUrl } from "./security.js";
-import { CleanWebError } from "./errors.js";
+import { PageNectarError } from "./errors.js";
 import type {
   AlternatePageFetcher,
   FetchedPage,
@@ -50,7 +50,7 @@ async function fetchAuto(url: URL, dependencies: ReaderDependencies): Promise<Fe
         return await alternate.fetch(url);
       } catch (error) {
         if (!dependencies.renderer) {
-          throw new CleanWebError(
+          throw new PageNectarError(
             "ALTERNATE_SOURCE_FAILED",
             "Alternate content source failed",
             { cause: error }
@@ -71,9 +71,9 @@ function assertUsefulContent(title: string | null, content: string): void {
     normalizedTitle === "access denied" ||
     normalizedTitle === "just a moment..." ||
     normalizedContent.includes("cloudflare ray id");
-  if (blocked) throw new CleanWebError("BLOCKED", "The site returned a bot-block page");
+  if (blocked) throw new PageNectarError("BLOCKED", "The site returned a bot-block page");
   if (!content.trim()) {
-    throw new CleanWebError("EXTRACTION_FAILED", "No readable content was extracted");
+    throw new PageNectarError("EXTRACTION_FAILED", "No readable content was extracted");
   }
 }
 

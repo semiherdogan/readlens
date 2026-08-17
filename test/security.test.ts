@@ -4,7 +4,7 @@ const { lookup } = vi.hoisted(() => ({ lookup: vi.fn() }));
 vi.mock("node:dns/promises", () => ({ lookup }));
 
 import { validatePublicUrl } from "../src/core/security.js";
-import { CleanWebError } from "../src/core/errors.js";
+import { PageNectarError } from "../src/core/errors.js";
 
 describe("validatePublicUrl", () => {
   it("accepts public HTTP and HTTPS URLs", async () => {
@@ -30,7 +30,7 @@ describe("validatePublicUrl", () => {
     "http://[fd00::1]",
     "http://[::1]"
   ])("rejects unsafe URL %s", async (url) => {
-    await expect(validatePublicUrl(url)).rejects.toBeInstanceOf(CleanWebError);
+    await expect(validatePublicUrl(url)).rejects.toBeInstanceOf(PageNectarError);
   });
 
   it("uses DNS resolution and rejects hostnames with any private address", async () => {
@@ -57,7 +57,7 @@ describe("validatePublicUrl", () => {
   it.each(["not a url", "http://[::ffff:127.0.0.1]", "http://[fe80::1]"])(
     "rejects malformed or private address %s",
     async (url) => {
-      await expect(validatePublicUrl(url)).rejects.toBeInstanceOf(CleanWebError);
+      await expect(validatePublicUrl(url)).rejects.toBeInstanceOf(PageNectarError);
     }
   );
 

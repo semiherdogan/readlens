@@ -106,10 +106,10 @@ describe("extractContent", () => {
       <p><b>Bold</b> and <i>italic</i><br><a>plain link</a>
       <img><img src="/image.png"></p>
       <figure><img src="/figure.png" alt="Diagram"><figcaption>A diagram</figcaption></figure>
-      <h2>Steps</h2><ul><li>Install</li><li>Run <code>cleanweb</code></li></ul>
+      <h2>Steps</h2><ul><li>Install</li><li>Run <code>pagenectar</code></li></ul>
       <ol><li>First</li></ol>
       <blockquote>Keep content focused.</blockquote>
-      <pre><code>cleanweb read URL</code></pre>
+      <pre><code>pagenectar read URL</code></pre>
       <!-- ignored -->
       ${"Supporting content. ".repeat(10)}
     </article></body></html>`;
@@ -119,7 +119,7 @@ describe("extractContent", () => {
     expect(result.content).toContain("# Guide");
     expect(result.content).toContain("[**documentation**](https://example.com/docs)");
     expect(result.content).toContain("## Steps");
-    expect(result.content).toContain("- Run `cleanweb`");
+    expect(result.content).toContain("- Run `pagenectar`");
     expect(result.content).toContain("1. First");
     expect(result.content).toContain("**Bold** and *italic*");
     expect(result.content).toContain("plain link");
@@ -128,7 +128,7 @@ describe("extractContent", () => {
       "![Diagram](https://example.com/figure.png)_A diagram_"
     );
     expect(result.content).toContain("> Keep content focused.");
-    expect(result.content).toContain("```\ncleanweb read URL\n```");
+    expect(result.content).toContain("```\npagenectar read URL\n```");
   });
 
   it("ignores images without a source in Markdown fallback content", () => {

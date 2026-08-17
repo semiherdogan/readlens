@@ -33,7 +33,7 @@ export function createDefaultReader(options: AppOptions): ReadPage {
   );
   const cacheDirectory =
     options.cacheDirectory ??
-    join(process.env.XDG_CACHE_HOME ?? join(homedir(), ".cache"), "cleanweb");
+    join(process.env.XDG_CACHE_HOME ?? join(homedir(), ".cache"), "pagenectar");
 
   return createReader({
     httpFetcher,

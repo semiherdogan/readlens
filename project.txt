@@ -1,13 +1,13 @@
 SECTION 1: PROJE TANIMI
 
-Proje adı geçici olarak CleanWeb olabilir.
+Proje adı geçici olarak PageNectar olabilir.
 
-CleanWeb, local çalışan ve AI modellerine web sayfalarının ham HTML veya DOM çıktısını vermek yerine yalnızca okunabilir ana içeriği sağlayan bir content gateway olacaktır.
+PageNectar, local çalışan ve AI modellerine web sayfalarının ham HTML veya DOM çıktısını vermek yerine yalnızca okunabilir ana içeriği sağlayan bir content gateway olacaktır.
 
 Ana fikir:
 
 AI bir URL verir.
-CleanWeb sayfayı açar.
+PageNectar sayfayı açar.
 JavaScript gerekiyorsa Lightpanda ile render eder.
 Ana içerik Mozilla Readability benzeri bir extractor ile bulunur.
 Navigasyon, footer, cookie popup, sidebar, reklam ve benzeri gereksiz içerikler temizlenir.
@@ -30,7 +30,7 @@ Local AI veya Agent
         | MCP
         |
         v
-CleanWeb MCP Server
+PageNectar MCP Server
         |
         |
         v
@@ -230,14 +230,14 @@ browser session
 
 Lightpanda yalnızca internal renderer görevi görmelidir.
 
-CleanWeb açısından Lightpanda'nın görevi:
+PageNectar açısından Lightpanda'nın görevi:
 
 URL açmak
 JavaScript çalıştırmak
 Redirect takip etmek
 Rendered DOM üretmek
 
-Daha sonra extraction işlemi CleanWeb tarafından yapılmalıdır.
+Daha sonra extraction işlemi PageNectar tarafından yapılmalıdır.
 
 
 ----
@@ -401,14 +401,14 @@ Bunun avantajları:
 
 Network portu açılması gerekmez.
 Kurulum basittir.
-Local AI client CleanWeb'i subprocess olarak çalıştırabilir.
+Local AI client PageNectar'i subprocess olarak çalıştırabilir.
 Güvenlik yüzeyi daha küçüktür.
 
 Örnek kullanım mantığı:
 
-cleanweb mcp
+pagenectar mcp
 
-AI client CleanWeb'i bu komutla başlatır.
+AI client PageNectar'i bu komutla başlatır.
 
 MCP tarafında extraction logic bulunmamalıdır.
 
@@ -423,19 +423,19 @@ MCP yanında CLI kesinlikle bulunmalıdır.
 
 Temel kullanım:
 
-cleanweb read https://example.com
+pagenectar read https://example.com
 
 JSON çıktı:
 
-cleanweb read https://example.com --json
+pagenectar read https://example.com --json
 
 Markdown çıktı:
 
-cleanweb read https://example.com --format markdown
+pagenectar read https://example.com --format markdown
 
 Debug:
 
-cleanweb read https://example.com --debug
+pagenectar read https://example.com --debug
 
 Debug çıktısında şu bilgiler gösterilebilir:
 
@@ -503,7 +503,7 @@ Kullanıcı özellikle isterse private network erişimini açabilir.
 
 Örnek:
 
-cleanweb mcp --allow-private
+pagenectar mcp --allow-private
 
 Redirect sonrası final URL de tekrar güvenlik kontrolünden geçirilmelidir.
 
@@ -516,7 +516,7 @@ SECTION 17: PROJE YAPISI
 
 Önerilen klasör yapısı:
 
-cleanweb
+pagenectar
 
 src
 
@@ -620,11 +620,11 @@ SECTION 20: VERSION 0.1 KULLANIMI
 
 Kurulum sonrası kullanıcı şu komutları kullanabilmelidir:
 
-cleanweb read URL
+pagenectar read URL
 
 ve
 
-cleanweb mcp
+pagenectar mcp
 
 AI tarafında ise yalnızca şu tool bulunmalıdır:
 
@@ -636,7 +636,7 @@ Kullanıcı bir URL hakkında soru sorar.
 
 AI read_page çağırır.
 
-CleanWeb URL'yi okur.
+PageNectar URL'yi okur.
 
 Temiz içerik döndürülür.
 
@@ -707,7 +707,7 @@ Daha sonra küçük bir local desktop veya tray app yapılabilir.
 
 Gösterilebilecek bilgiler:
 
-CleanWeb running durumu
+PageNectar running durumu
 
 Lightpanda running durumu
 
@@ -744,9 +744,9 @@ Core Reader bağımsız kalmalıdır.
 
 SECTION 24: TEMEL TASARIM KARARI
 
-CleanWeb bir browser MCP olmamalıdır.
+PageNectar bir browser MCP olmamalıdır.
 
-CleanWeb bir reader MCP olmalıdır.
+PageNectar bir reader MCP olmalıdır.
 
 Browser MCP yaklaşımı:
 
@@ -755,11 +755,11 @@ AI DOM ile uğraşır.
 AI hangi node'un önemli olduğunu anlamaya çalışır.
 Context gereksiz içerikle dolar.
 
-CleanWeb yaklaşımı:
+PageNectar yaklaşımı:
 
 AI URL verir.
-CleanWeb sayfayı okur.
-CleanWeb gereksiz içeriği temizler.
+PageNectar sayfayı okur.
+PageNectar gereksiz içeriği temizler.
 AI yalnızca gerçek içeriği görür.
 
 Bu projenin temel farkı budur.
@@ -773,24 +773,24 @@ Son kullanıcı deneyimi mümkün olduğunca basit olmalıdır.
 
 Kurulum:
 
-cleanweb install
+pagenectar install
 
 Çalıştırma:
 
-cleanweb mcp
+pagenectar mcp
 
 AI configuration:
 
-command = cleanweb
+command = pagenectar
 args = mcp
 
 Bundan sonra AI tek bir tool görür:
 
 read_page
 
-Kullanıcı bir URL gönderdiğinde AI browser kullanmak yerine CleanWeb'i kullanır.
+Kullanıcı bir URL gönderdiğinde AI browser kullanmak yerine PageNectar'i kullanır.
 
-CleanWeb sayfayı render eder, ana içeriği bulur, temizler ve AI için minimum gürültülü veri üretir.
+PageNectar sayfayı render eder, ana içeriği bulur, temizler ve AI için minimum gürültülü veri üretir.
 
 Projenin temel prensibi:
 

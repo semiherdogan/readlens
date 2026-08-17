@@ -1,5 +1,5 @@
 {
-  "name": "cleanweb",
+  "name": "pagenectar",
   "version": "0.1.0",
   "description": "A local web reader for AI agents that returns content, not webpages.",
   "keywords": [
@@ -11,12 +11,13 @@
   ],
   "type": "module",
   "bin": {
-    "cleanweb": "./dist/cli/index.js"
+    "pagenectar": "./dist/cli/index.js"
   },
   "exports": {
     ".": "./dist/index.js"
   },
   "files": [
+    "assets/pagenectar-cover.jpg",
     "dist",
     "docs",
     "README.md",

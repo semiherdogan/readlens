@@ -12,8 +12,8 @@ type CliDependencies = {
 };
 
 const USAGE = `Usage:
-  cleanweb read <url> [--json] [--render auto|always|never] [--lightpanda <path>] [--max-chars 30000]
-  cleanweb mcp [--lightpanda <path>] [--allow-private] [--no-cache] [--cache-ttl 3600]
+  pagenectar read <url> [--json] [--render auto|always|never] [--lightpanda <path>] [--max-chars 30000]
+  pagenectar mcp [--lightpanda <path>] [--allow-private] [--no-cache] [--cache-ttl 3600]
 `;
 
 function messageFrom(error: unknown): string {

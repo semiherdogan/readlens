@@ -1,9 +1,9 @@
 # MCP setup
 
-CleanWeb runs as a local stdio MCP server. For a published npm release, the launch command is:
+PageNectar runs as a local stdio MCP server. For a published npm release, the launch command is:
 
 ```sh
-npx -y cleanweb@latest mcp
+npx -y pagenectar@latest mcp
 ```
 
 For reproducible installations, replace `latest` with an exact version such as `0.1.0`.
@@ -11,7 +11,7 @@ For reproducible installations, replace `latest` with an exact version such as `
 ## Codex
 
 ```sh
-codex mcp add cleanweb -- npx -y cleanweb@latest mcp
+codex mcp add pagenectar -- npx -y pagenectar@latest mcp
 ```
 
 Run `codex mcp list` to verify the configuration. The ChatGPT desktop app, Codex CLI, and Codex IDE extension share this MCP configuration. See the [official Codex MCP documentation](https://developers.openai.com/codex/mcp).
@@ -19,7 +19,7 @@ Run `codex mcp list` to verify the configuration. The ChatGPT desktop app, Codex
 ## Claude Code
 
 ```sh
-claude mcp add cleanweb -- npx -y cleanweb@latest mcp
+claude mcp add pagenectar -- npx -y pagenectar@latest mcp
 ```
 
 Run `/mcp` in Claude Code to verify that the server and its tools are available.
@@ -32,15 +32,15 @@ OpenCode provides an interactive setup command:
 opencode mcp add
 ```
 
-Choose a local server, name it `cleanweb`, and use `npx -y cleanweb@latest mcp` as its command. Alternatively, add CleanWeb directly to `opencode.json`:
+Choose a local server, name it `pagenectar`, and use `npx -y pagenectar@latest mcp` as its command. Alternatively, add PageNectar directly to `opencode.json`:
 
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
   "mcp": {
-    "cleanweb": {
+    "pagenectar": {
       "type": "local",
-      "command": ["npx", "-y", "cleanweb@latest", "mcp"],
+      "command": ["npx", "-y", "pagenectar@latest", "mcp"],
       "enabled": true
     }
   }
@@ -54,9 +54,9 @@ Run `opencode mcp list` to check the connection. See the [official OpenCode MCP 
 ```json
 {
   "mcpServers": {
-    "cleanweb": {
+    "pagenectar": {
       "command": "npx",
-      "args": ["-y", "cleanweb@latest", "mcp"]
+      "args": ["-y", "pagenectar@latest", "mcp"]
     }
   }
 }
@@ -71,12 +71,12 @@ For temporary private-repository testing:
 ```json
 {
   "mcpServers": {
-    "cleanweb": {
+    "pagenectar": {
       "command": "npx",
       "args": [
         "-y",
-        "--package=git+ssh://git@github.com/semiherdogan/cleanweb.git",
-        "cleanweb",
+        "--package=git+ssh://git@github.com/semiherdogan/pagenectar.git",
+        "pagenectar",
         "mcp"
       ]
     }

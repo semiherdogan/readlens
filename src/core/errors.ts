@@ -1,4 +1,4 @@
-export type CleanWebErrorCode =
+export type PageNectarErrorCode =
   | "INVALID_URL"
   | "PRIVATE_NETWORK"
   | "HTTP_STATUS"
@@ -13,18 +13,18 @@ export type CleanWebErrorCode =
   | "EXTRACTION_FAILED"
   | "ALTERNATE_SOURCE_FAILED";
 
-export class CleanWebError extends Error {
-  readonly code: CleanWebErrorCode;
+export class PageNectarError extends Error {
+  readonly code: PageNectarErrorCode;
 
-  constructor(code: CleanWebErrorCode, message: string, options?: ErrorOptions) {
+  constructor(code: PageNectarErrorCode, message: string, options?: ErrorOptions) {
     super(message, options);
-    this.name = "CleanWebError";
+    this.name = "PageNectarError";
     this.code = code;
   }
 }
 
 export function errorPayload(error: unknown): { code: string; message: string } {
-  if (error instanceof CleanWebError) {
+  if (error instanceof PageNectarError) {
     return { code: error.code, message: error.message };
   }
   if (error instanceof Error) {

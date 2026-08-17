@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to CleanWeb will be documented in this file.
+All notable changes to PageNectar will be documented in this file.
 
 ## Unreleased
 

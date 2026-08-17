@@ -2,9 +2,9 @@ import { Client } from "@modelcontextprotocol/client";
 import { InMemoryTransport } from "@modelcontextprotocol/server";
 import { describe, expect, it, vi } from "vitest";
 
-import { createCleanWebMcpServer } from "../src/mcp/server.js";
+import { createPageNectarMcpServer } from "../src/mcp/server.js";
 import type { ReadPageResult } from "../src/core/types.js";
-import { CleanWebError } from "../src/core/errors.js";
+import { PageNectarError } from "../src/core/errors.js";
 
 const pageResult: ReadPageResult = {
   url: "https://example.com/",
@@ -23,11 +23,11 @@ const pageResult: ReadPageResult = {
   truncated: false
 };
 
-describe("createCleanWebMcpServer", () => {
+describe("createPageNectarMcpServer", () => {
   it("exposes only read_page and returns structured content", async () => {
     const readPage = vi.fn().mockResolvedValue(pageResult);
-    const server = createCleanWebMcpServer(readPage);
-    const client = new Client({ name: "cleanweb-test", version: "1.0.0" });
+    const server = createPageNectarMcpServer(readPage);
+    const client = new Client({ name: "pagenectar-test", version: "1.0.0" });
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
 
     await server.connect(serverTransport);
@@ -55,10 +55,10 @@ describe("createCleanWebMcpServer", () => {
   });
 
   it("returns typed tool errors", async () => {
-    const server = createCleanWebMcpServer(
-      vi.fn().mockRejectedValue(new CleanWebError("BLOCKED", "Blocked page"))
+    const server = createPageNectarMcpServer(
+      vi.fn().mockRejectedValue(new PageNectarError("BLOCKED", "Blocked page"))
     );
-    const client = new Client({ name: "cleanweb-test", version: "1.0.0" });
+    const client = new Client({ name: "pagenectar-test", version: "1.0.0" });
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
     await server.connect(serverTransport);
     await client.connect(clientTransport);

@@ -1,10 +1,10 @@
 import { serveStdio } from "@modelcontextprotocol/server/stdio";
 
 import type { ReadPage } from "../core/types.js";
-import { createCleanWebMcpServer } from "./server.js";
+import { createPageNectarMcpServer } from "./server.js";
 
 export function startMcpStdio(readPage: ReadPage): void {
-  serveStdio(() => createCleanWebMcpServer(readPage), {
+  serveStdio(() => createPageNectarMcpServer(readPage), {
     onerror: (error) => {
       console.error(error.message);
     }

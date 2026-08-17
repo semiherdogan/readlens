@@ -36,8 +36,8 @@ const outputSchema = z.object({
   truncated: z.boolean()
 });
 
-export function createCleanWebMcpServer(readPage: ReadPage): McpServer {
-  const server = new McpServer({ name: "cleanweb", version: "0.1.0" });
+export function createPageNectarMcpServer(readPage: ReadPage): McpServer {
+  const server = new McpServer({ name: "pagenectar", version: "0.1.0" });
 
   server.registerTool(
     "read_page",

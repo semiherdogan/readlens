@@ -1,12 +1,16 @@
-# CleanWeb
+<p align="center">
+  <img src="assets/pagenectar-cover.jpg" alt="PageNectar: Extract the nectar from any page">
+</p>
 
-CleanWeb is a local web content gateway for AI agents. It fetches a URL, extracts the readable main content, removes common page chrome, and returns a small structured result instead of a raw DOM.
+# PageNectar
 
-> A local web reader for AI agents that returns content, not webpages.
+PageNectar is a local web content gateway for AI agents. It fetches a URL, extracts the readable main content, removes common page chrome, and returns a small structured result instead of a raw DOM.
+
+> Extract the nectar from any page.
 
 ## Status
 
-CleanWeb is an early v0.1 implementation. It currently provides:
+PageNectar is an early v0.1 implementation. It currently provides:
 
 - HTTP-first reading with an automatic Lightpanda fallback
 - Official author-feed fallback for Medium pages that reject direct requests
@@ -29,7 +33,7 @@ Lightpanda is optional when `--render never` is used. See the [installation guid
 ## Quick start
 
 ```sh
-npx -y cleanweb@latest read https://example.com
+npx -y pagenectar@latest read https://example.com
 ```
 
 ## CLI
@@ -37,53 +41,53 @@ npx -y cleanweb@latest read https://example.com
 Read a page as plain text:
 
 ```sh
-cleanweb read https://example.com/article
+pagenectar read https://example.com/article
 ```
 
 Return the complete structured result:
 
 ```sh
-cleanweb read https://example.com/article --json
+pagenectar read https://example.com/article --json
 ```
 
 Preserve semantic structure as Markdown:
 
 ```sh
-cleanweb read https://example.com/article --format markdown
+pagenectar read https://example.com/article --format markdown
 ```
 
 Control JavaScript rendering:
 
 ```sh
-cleanweb read https://example.com/app --render auto
-cleanweb read https://example.com/app --render always
-cleanweb read https://example.com/article --render never
+pagenectar read https://example.com/app --render auto
+pagenectar read https://example.com/app --render always
+pagenectar read https://example.com/article --render never
 ```
 
 Limit returned content and show diagnostics:
 
 ```sh
-cleanweb read https://example.com/article --max-chars 10000 --debug
+pagenectar read https://example.com/article --max-chars 10000 --debug
 ```
 
 Disable cache or change its TTL in seconds:
 
 ```sh
-cleanweb read https://example.com/article --no-cache
-cleanweb read https://example.com/article --cache-ttl 900
+pagenectar read https://example.com/article --no-cache
+pagenectar read https://example.com/article --cache-ttl 900
 ```
 
-Cache files are stored under `$XDG_CACHE_HOME/cleanweb` or `~/.cache/cleanweb`.
+Cache files are stored under `$XDG_CACHE_HOME/pagenectar` or `~/.cache/pagenectar`.
 
 `auto` is the default. It tries a normal HTTP request first, then invokes Lightpanda when the extracted content is too small.
 
 ## MCP server
 
-CleanWeb runs as a local stdio MCP server:
+PageNectar runs as a local stdio MCP server:
 
 ```sh
-codex mcp add cleanweb -- npx -y cleanweb@latest mcp
-claude mcp add cleanweb -- npx -y cleanweb@latest mcp
+codex mcp add pagenectar -- npx -y pagenectar@latest mcp
+claude mcp add pagenectar -- npx -y pagenectar@latest mcp
 ```
 
 See the [MCP setup guide](docs/mcp.md) for Codex, Claude Code, Claude Desktop, OpenCode, JSON-based clients, and private GitHub usage.
@@ -100,13 +104,13 @@ Tool failures return stable codes such as `HTTP_STATUS`, `BLOCKED`, `FETCH_TIMEO
 
 ## Security
 
-CleanWeb accepts only HTTP and HTTPS URLs. It rejects localhost, private IPv4 ranges, loopback addresses, link-local addresses, and private IPv6 ranges by default. Redirect targets are validated before HTTP redirects are followed. Lightpanda is invoked with its private-network blocking option.
+PageNectar accepts only HTTP and HTTPS URLs. It rejects localhost, private IPv4 ranges, loopback addresses, link-local addresses, and private IPv6 ranges by default. Redirect targets are validated before HTTP redirects are followed. Lightpanda is invoked with its private-network blocking option.
 
 Local network access requires explicit opt-in:
 
 ```sh
-cleanweb read http://127.0.0.1:8080 --allow-private
-cleanweb mcp --allow-private
+pagenectar read http://127.0.0.1:8080 --allow-private
+pagenectar mcp --allow-private
 ```
 
 Treat `--allow-private` as a security-sensitive option, especially when an agent chooses URLs.

@@ -1,6 +1,6 @@
-# Contributing to CleanWeb
+# Contributing to PageNectar
 
-Thanks for helping improve CleanWeb. Keep changes small, focused, and testable.
+Thanks for helping improve PageNectar. Keep changes small, focused, and testable.
 
 ## Development setup
 
