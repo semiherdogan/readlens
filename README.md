@@ -9,6 +9,7 @@ CleanWeb is a local web content gateway for AI agents. It fetches a URL, extract
 CleanWeb is an early v0.1 implementation. It currently provides:
 
 - HTTP-first reading with an automatic Lightpanda fallback
+- Official author-feed fallback for Medium pages that reject direct requests
 - Mozilla Readability extraction
 - `article`, `main`, text-density, and body-text fallbacks
 - Text output with metadata and truncation
@@ -131,4 +132,3 @@ The current coverage threshold is intentionally strict. Coverage work can contin
 ## v0.1 boundaries
 
 The first version intentionally does not include crawling, search, batch reading, embeddings, cloud hosting, authentication, a GUI, or multiple browser engines. Markdown output, caching, and cursor-based continuation are candidates for later releases.
-

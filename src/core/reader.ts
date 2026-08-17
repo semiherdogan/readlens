@@ -1,6 +1,7 @@
 import { extractContent } from "../extractors/extract.js";
 import { validatePublicUrl } from "./security.js";
 import type {
+  AlternatePageFetcher,
   FetchedPage,
   PageFetcher,
   ReadPageInput,
@@ -11,6 +12,7 @@ import type {
 export type ReaderDependencies = {
   httpFetcher: PageFetcher;
   renderer?: PageFetcher;
+  alternateFetchers?: AlternatePageFetcher[];
   validateUrl?: (url: string) => Promise<URL>;
 };
 
@@ -22,6 +24,17 @@ function countWords(content: string): number {
 
 function shouldRender(content: string): boolean {
   return content.length < 200;
+}
+
+async function fetchAuto(url: URL, dependencies: ReaderDependencies): Promise<FetchedPage> {
+  try {
+    return await dependencies.httpFetcher.fetch(url);
+  } catch (httpError) {
+    const alternate = dependencies.alternateFetchers?.find((fetcher) => fetcher.supports(url));
+    if (alternate) return alternate.fetch(url);
+    if (dependencies.renderer) return dependencies.renderer.fetch(url);
+    throw httpError;
+  }
 }
 
 export function createReader(dependencies: ReaderDependencies) {
@@ -36,6 +49,8 @@ export function createReader(dependencies: ReaderDependencies) {
     if (render === "always") {
       if (!dependencies.renderer) throw new Error("Lightpanda renderer is not available");
       page = await dependencies.renderer.fetch(url);
+    } else if (render === "auto") {
+      page = await fetchAuto(url, dependencies);
     } else {
       page = await dependencies.httpFetcher.fetch(url);
     }
@@ -43,7 +58,12 @@ export function createReader(dependencies: ReaderDependencies) {
     await validateUrl(page.finalUrl);
     let extracted = extractContent(page.html, page.finalUrl);
 
-    if (render === "auto" && shouldRender(extracted.content) && dependencies.renderer) {
+    if (
+      render === "auto" &&
+      page.renderer !== "lightpanda" &&
+      shouldRender(extracted.content) &&
+      dependencies.renderer
+    ) {
       page = await dependencies.renderer.fetch(url);
       await validateUrl(page.finalUrl);
       extracted = extractContent(page.html, page.finalUrl);

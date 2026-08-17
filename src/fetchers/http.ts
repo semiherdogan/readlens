@@ -9,6 +9,7 @@ export type HttpFetcherOptions = {
   timeoutMs?: number;
   maxBytes?: number;
   maxRedirects?: number;
+  acceptedContentTypes?: string[];
 };
 
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
@@ -45,6 +46,10 @@ export function createHttpFetcher(options: HttpFetcherOptions = {}): PageFetcher
   const timeoutMs = options.timeoutMs ?? 15_000;
   const maxBytes = options.maxBytes ?? 2_000_000;
   const maxRedirects = options.maxRedirects ?? 5;
+  const acceptedContentTypes = options.acceptedContentTypes ?? [
+    "text/html",
+    "application/xhtml+xml"
+  ];
 
   return {
     async fetch(inputUrl: URL): Promise<FetchedPage> {
@@ -54,7 +59,7 @@ export function createHttpFetcher(options: HttpFetcherOptions = {}): PageFetcher
       while (true) {
         const response = await fetchFunction(url, {
           headers: {
-            accept: "text/html,application/xhtml+xml",
+            accept: acceptedContentTypes.join(","),
             "user-agent": "CleanWeb/0.1"
           },
           redirect: "manual",
@@ -72,7 +77,7 @@ export function createHttpFetcher(options: HttpFetcherOptions = {}): PageFetcher
 
         if (!response.ok) throw new Error(`HTTP request failed with status ${response.status}`);
         const contentType = response.headers.get("content-type")?.toLowerCase() ?? "";
-        if (!contentType.includes("text/html") && !contentType.includes("application/xhtml+xml")) {
+        if (!acceptedContentTypes.some((type) => contentType.includes(type))) {
           throw new Error(`Unsupported content type: ${contentType || "unknown"}`);
         }
 

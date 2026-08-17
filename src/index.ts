@@ -4,6 +4,7 @@ export { validatePublicUrl } from "./core/security.js";
 export type {
   ExtractedContent,
   FetchedPage,
+  AlternatePageFetcher,
   PageFetcher,
   ReadPage,
   ReadPageInput,

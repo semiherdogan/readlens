@@ -3,6 +3,7 @@ import { validatePublicUrl } from "./core/security.js";
 import type { ReadPage } from "./core/types.js";
 import { createHttpFetcher } from "./fetchers/http.js";
 import { createLightpandaFetcher } from "./fetchers/lightpanda.js";
+import { createMediumFeedFetcher } from "./fetchers/medium-feed.js";
 
 export type AppOptions = {
   allowPrivateNetwork: boolean;
@@ -17,9 +18,18 @@ export function createDefaultReader(options: AppOptions): ReadPage {
     ...(options.lightpandaExecutable ? { executable: options.lightpandaExecutable } : {})
   };
 
+  const httpFetcher = createHttpFetcher({ validateUrl });
+  const mediumFeedFetcher = createMediumFeedFetcher(
+    createHttpFetcher({
+      validateUrl,
+      acceptedContentTypes: ["text/xml", "application/xml", "application/rss+xml"]
+    })
+  );
+
   return createReader({
-    httpFetcher: createHttpFetcher({ validateUrl }),
+    httpFetcher,
     renderer: createLightpandaFetcher(lightpandaOptions),
+    alternateFetchers: [mediumFeedFetcher],
     validateUrl
   });
 }

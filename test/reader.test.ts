@@ -140,4 +140,26 @@ describe("createReader", () => {
       finalUrl: "https://1.1.1.1/"
     });
   });
+
+  it("uses a supported alternate fetcher after an HTTP error in auto mode", async () => {
+    const alternate = {
+      supports: vi.fn().mockReturnValue(true),
+      fetch: vi.fn().mockResolvedValue({
+        finalUrl: "https://writer.medium.com/article",
+        html: articleHtml,
+        status: 200,
+        renderer: "http" as const
+      })
+    };
+    const readPage = createReader({
+      httpFetcher: { fetch: vi.fn().mockRejectedValue(new Error("HTTP 403")) },
+      alternateFetchers: [alternate],
+      validateUrl: async (url) => new URL(url)
+    });
+
+    const result = await readPage({ url: "https://writer.medium.com/article" });
+
+    expect(alternate.fetch).toHaveBeenCalledOnce();
+    expect(result.title).toBe("A focused article");
+  });
 });
