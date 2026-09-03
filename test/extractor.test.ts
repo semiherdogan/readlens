@@ -78,6 +78,16 @@ describe("extractContent", () => {
     });
   });
 
+  it("prefers a denser fallback when Readability misses the end of an article", () => {
+    const html = readFileSync(new URL("./fixtures/dincer-phpunit.html", import.meta.url), "utf8");
+
+    const result = extractContent(html, "https://dincer.info/yazi/phpunit-ve-tdd-yaklasimi");
+
+    expect(result.extractionMethod).toBe("text-density");
+    expect(result.content).toContain("Assertions (Onaylama-İddia)");
+    expect(result.content).toContain("Mock Objects (Sahte Nesneler)");
+  });
+
   it("extracts published dates from metadata and time elements", () => {
     const metadata = extractContent(
       `<html><head><meta property="article:published_time" content="2026-08-10"></head>

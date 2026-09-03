@@ -95,7 +95,7 @@ See the [MCP setup guide](docs/mcp.md) for Codex, Claude Code, Claude Desktop, O
 The server exposes one tool:
 
 ```text
-read_page(url, format = "text", render = "auto", maxChars = 30000)
+read_page(url, format = "text", render = "auto", maxChars = 100000)
 ```
 
 Its result includes the final URL, title, author, site name, description, content, language, publication date, counts, extraction method, confidence heuristic, and truncation state.

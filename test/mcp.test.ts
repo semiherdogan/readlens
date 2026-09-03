@@ -45,7 +45,7 @@ describe("createReadLensMcpServer", () => {
         url: "https://example.com",
         format: "text",
         render: "auto",
-        maxChars: 30_000
+        maxChars: 100_000
       });
       expect(result.structuredContent).toEqual(pageResult);
     } finally {

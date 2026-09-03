@@ -129,6 +129,16 @@ function propertyMetadata(document: Document, property: string): string | null {
   );
 }
 
+function elementDepth(element: Element): number {
+  let depth = 0;
+  let parent = element.parentElement;
+  while (parent) {
+    depth += 1;
+    parent = parent.parentElement;
+  }
+  return depth;
+}
+
 function fallbackContent(document: Document): {
   content: string;
   html: string;
@@ -152,13 +162,16 @@ function fallbackContent(document: Document): {
       html: element.outerHTML,
       linkText: cleanText(
         [...element.querySelectorAll("a")].map((link) => link.textContent).join(" ")
-      )
+      ),
+      depth: elementDepth(element)
     }))
     .filter(({ content }) => content.length >= 80)
     .sort((left, right) => {
       const leftScore = left.content.length - left.linkText.length * 2;
       const rightScore = right.content.length - right.linkText.length * 2;
-      return rightScore - leftScore;
+      const scoreDifference = rightScore - leftScore;
+      const similarScores = Math.abs(scoreDifference) < Math.max(leftScore, rightScore) * 0.1;
+      return similarScores ? right.depth - left.depth : scoreDifference;
     });
 
   const dense = candidates[0]?.content;
@@ -170,6 +183,14 @@ function fallbackContent(document: Document): {
     html: document.body.innerHTML,
     method: "body-text"
   };
+}
+
+function shouldPreferFallback(readableText: string, fallbackText: string): boolean {
+  return (
+    readableText.length >= 120 &&
+    fallbackText.length > readableText.length + 500 &&
+    fallbackText.startsWith(readableText.slice(0, 120))
+  );
 }
 
 function confidence(method: ExtractionMethod, contentLength: number): number {
@@ -199,13 +220,14 @@ export function extractContent(
     ? structuredText(JSDOM.fragment(article.content))
     : "";
   const readableText = candidateText.length >= 120 ? candidateText : "";
-  const fallback = readableText ? null : fallbackContent(document);
-  const sourceHtml = readableText ? article!.content! : fallback!.html;
+  const fallback = fallbackContent(document);
+  const useFallback = !readableText || shouldPreferFallback(readableText, fallback.content);
+  const sourceHtml = useFallback ? fallback.html : article!.content!;
   const content =
     format === "markdown"
       ? htmlToMarkdown(sourceHtml, url)
-      : readableText || fallback!.content;
-  const extractionMethod: ExtractionMethod = fallback ? fallback.method : "readability";
+      : useFallback ? fallback.content : readableText;
+  const extractionMethod: ExtractionMethod = useFallback ? fallback.method : "readability";
   const publishedAt =
     propertyMetadata(document, "article:published_time") ||
     document.querySelector("time[datetime]")?.getAttribute("datetime")?.trim() ||

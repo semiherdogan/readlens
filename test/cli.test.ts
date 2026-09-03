@@ -49,7 +49,7 @@ describe("runCli", () => {
       url: "https://example.com",
       format: "text",
       render: "auto",
-      maxChars: 30_000
+      maxChars: 100_000
     });
     expect(JSON.parse(stdout)).toEqual(result);
     expect(stderr).toBe("");

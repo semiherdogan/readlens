@@ -12,7 +12,7 @@ type CliDependencies = {
 };
 
 const USAGE = `Usage:
-  readlens read <url> [--json] [--render auto|always|never] [--lightpanda <path>] [--max-chars 30000]
+  readlens read <url> [--json] [--render auto|always|never] [--lightpanda <path>] [--max-chars 100000]
   readlens mcp [--lightpanda <path>] [--allow-private] [--no-cache] [--cache-ttl 3600]
 `;
 
@@ -28,7 +28,7 @@ function parseRender(value: string | undefined): RenderMode {
 }
 
 function parseMaxChars(value: string | undefined): number {
-  if (!value) return 30_000;
+  if (!value) return 100_000;
   const parsed = Number(value);
   if (!Number.isInteger(parsed) || parsed < 1 || parsed > 1_000_000) {
     throw new Error("max-chars must be an integer between 1 and 1000000");

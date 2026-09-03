@@ -23,7 +23,7 @@ export type ReaderDependencies = {
   validateUrl?: (url: string) => Promise<URL>;
 };
 
-const DEFAULT_MAX_CHARS = 30_000;
+const DEFAULT_MAX_CHARS = 100_000;
 const DEFAULT_CACHE_TTL_MS = 60 * 60 * 1000;
 
 function cacheKey(url: URL, input: ReadPageInput, render: RenderMode, maxChars: number): string {

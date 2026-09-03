@@ -8,7 +8,7 @@ const inputSchema = z.object({
   url: z.url().describe("Public HTTP or HTTPS page URL"),
   format: z.enum(["text", "markdown"]).default("text"),
   render: z.enum(["auto", "always", "never"]).default("auto"),
-  maxChars: z.int().min(1).max(1_000_000).default(30_000)
+  maxChars: z.int().min(1).max(1_000_000).default(100_000)
 });
 
 const nullableString = z.string().nullable();
