@@ -6,6 +6,8 @@ ReadLens runs as a local stdio MCP server. The launch command is:
 npx -y readlens@latest mcp
 ```
 
+The MCP tool defaults to `format = "text"`, which returns plain readable content without link URLs. Agents should request `format = "markdown"` when links, citations, or reference sections need to remain actionable.
+
 For reproducible installations, replace `latest` with an exact version such as `0.1.0`.
 
 ## Codex

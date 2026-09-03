@@ -12,7 +12,7 @@ type CliDependencies = {
 };
 
 const USAGE = `Usage:
-  readlens read <url> [--json] [--render auto|always|never] [--lightpanda <path>] [--max-chars 100000]
+  readlens read <url> [--json] [--format text|markdown] [--render auto|always|never] [--lightpanda <path>] [--max-chars 100000]
   readlens mcp [--lightpanda <path>] [--allow-private] [--no-cache] [--cache-ttl 3600]
 `;
 

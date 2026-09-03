@@ -6,7 +6,12 @@ import { errorPayload } from "../core/errors.js";
 
 const inputSchema = z.object({
   url: z.url().describe("Public HTTP or HTTPS page URL"),
-  format: z.enum(["text", "markdown"]).default("text"),
+  format: z
+    .enum(["text", "markdown"])
+    .default("text")
+    .describe(
+      "Output format. Use text for plain readable content. Use markdown when preserving links is important, including reference lists, citations, headings, lists, quotes, and code."
+    ),
   render: z.enum(["auto", "always", "never"]).default("auto"),
   maxChars: z.int().min(1).max(1_000_000).default(100_000)
 });
@@ -44,7 +49,7 @@ export function createReadLensMcpServer(readPage: ReadPage): McpServer {
     "read_page",
     {
       title: "Read page",
-      description: "Return the readable main content of a public web page.",
+      description: "Return the readable main content of a public web page. The default text format omits link URLs; request format=markdown when links, citations, or reference sections need to remain actionable.",
       inputSchema,
       outputSchema,
       annotations: {

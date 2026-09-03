@@ -56,6 +56,8 @@ Preserve semantic structure as Markdown:
 readlens read https://example.com/article --format markdown
 ```
 
+Plain `text` output is the default and intentionally returns readable text without link URLs. Use `--format markdown` when links should remain actionable, especially for citations, reference lists, changelogs, and articles with many inline links.
+
 Control JavaScript rendering:
 
 ```sh
@@ -97,6 +99,8 @@ The server exposes one tool:
 ```text
 read_page(url, format = "text", render = "auto", maxChars = 100000)
 ```
+
+`format = "text"` is plain readable text and omits link URLs. Agents should request `format = "markdown"` when links, citations, or reference sections need to remain actionable.
 
 Its result includes the final URL, title, author, site name, description, content, language, publication date, counts, extraction method, confidence heuristic, and truncation state.
 
