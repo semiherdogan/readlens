@@ -49,7 +49,7 @@ export interface PageFetcher {
   fetch(url: URL): Promise<FetchedPage>;
 }
 
-export interface AlternatePageFetcher extends PageFetcher {
+export interface SiteAdapter extends PageFetcher {
   supports(url: URL): boolean;
 }
 

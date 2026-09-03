@@ -86,12 +86,12 @@ describe("createLightpandaFetcher", () => {
   });
 
   it("explains how to install a missing Lightpanda executable", async () => {
-    const fetcher = createLightpandaFetcher({ executable: "/pagenectar/missing" });
+    const fetcher = createLightpandaFetcher({ executable: "/readlens/missing" });
 
     await expect(fetcher.fetch(new URL("https://example.com"))).rejects.toMatchObject({
       code: "LIGHTPANDA_NOT_FOUND",
       message: expect.stringMatching(
-        /not found at \/pagenectar\/missing.*--lightpanda <path>.*--render never/u
+        /not found at \/readlens\/missing.*--lightpanda <path>.*--render never/u
       )
     });
   });

@@ -1,14 +1,14 @@
 {
-  "name": "pagenectar",
+  "name": "readlens",
   "version": "0.1.0",
-  "description": "Clean web content for AI agents.",
+  "description": "Clean web reading for AI agents.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/semiherdogan/pagenectar.git"
+    "url": "git+https://github.com/semiherdogan/readlens.git"
   },
-  "homepage": "https://github.com/semiherdogan/pagenectar#readme",
+  "homepage": "https://github.com/semiherdogan/readlens#readme",
   "bugs": {
-    "url": "https://github.com/semiherdogan/pagenectar/issues"
+    "url": "https://github.com/semiherdogan/readlens/issues"
   },
   "keywords": [
     "ai",
@@ -19,13 +19,13 @@
   ],
   "type": "module",
   "bin": {
-    "pagenectar": "dist/cli/index.js"
+    "readlens": "dist/cli/index.js"
   },
   "exports": {
     ".": "./dist/index.js"
   },
   "files": [
-    "assets/pagenectar-cover.jpg",
+    "assets/readlens-cover.svg",
     "dist",
     "docs",
     "README.md",

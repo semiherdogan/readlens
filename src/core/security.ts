@@ -1,7 +1,7 @@
 import { lookup } from "node:dns/promises";
 import { isIP } from "node:net";
 
-import { PageNectarError } from "./errors.js";
+import { ReadLensError } from "./errors.js";
 
 export type HostResolver = (hostname: string) => Promise<string[]>;
 
@@ -60,28 +60,28 @@ export async function validatePublicUrl(
   try {
     url = new URL(input);
   } catch {
-    throw new PageNectarError("INVALID_URL", "Invalid URL");
+    throw new ReadLensError("INVALID_URL", "Invalid URL");
   }
 
   if (url.protocol !== "http:" && url.protocol !== "https:") {
-    throw new PageNectarError("INVALID_URL", "Only HTTP and HTTPS URLs are supported");
+    throw new ReadLensError("INVALID_URL", "Only HTTP and HTTPS URLs are supported");
   }
 
   if (options.allowPrivateNetwork) return url;
 
   const hostname = url.hostname.toLowerCase().replace(/^\[|\]$/g, "");
   if (hostname === "localhost" || hostname.endsWith(".localhost")) {
-    throw new PageNectarError("PRIVATE_NETWORK", "Private network URLs are disabled");
+    throw new ReadLensError("PRIVATE_NETWORK", "Private network URLs are disabled");
   }
 
   const addresses = isIP(hostname)
     ? [hostname]
     : await (options.resolve ?? defaultResolve)(hostname);
   if (addresses.length === 0) {
-    throw new PageNectarError("PRIVATE_NETWORK", "Private network URLs are disabled");
+    throw new ReadLensError("PRIVATE_NETWORK", "Private network URLs are disabled");
   }
   if (addresses.some(isPrivateIp)) {
-    throw new PageNectarError("PRIVATE_NETWORK", "Private network URLs are disabled");
+    throw new ReadLensError("PRIVATE_NETWORK", "Private network URLs are disabled");
   }
 
   return url;

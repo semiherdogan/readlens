@@ -89,7 +89,7 @@ describe("runCli", () => {
     });
 
     expect(exitCode).toBe(0);
-    expect(stdout).toContain("pagenectar read");
+    expect(stdout).toContain("readlens read");
   });
 
   it("starts the MCP server", async () => {

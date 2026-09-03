@@ -1,6 +1,6 @@
 import { JSDOM } from "jsdom";
 
-import type { AlternatePageFetcher, FetchedPage, PageFetcher } from "../core/types.js";
+import type { FetchedPage, PageFetcher, SiteAdapter } from "../core/types.js";
 
 function mediumHandle(url: URL): string | null {
   if (url.hostname.endsWith(".medium.com")) {
@@ -54,7 +54,7 @@ function createArticleHtml(item: Element, url: URL): string {
   return dom.serialize();
 }
 
-export function createMediumFeedFetcher(feedFetcher: PageFetcher): AlternatePageFetcher {
+export function createMediumAdapter(feedFetcher: PageFetcher): SiteAdapter {
   return {
     supports(url): boolean {
       return mediumHandle(url) !== null;

@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-PageNectar is pre-release software. Security fixes currently target the latest revision on the default branch.
+ReadLens is pre-release software. Security fixes currently target the latest revision on the default branch.
 
 ## Reporting a vulnerability
 
@@ -12,5 +12,5 @@ Include reproduction steps, affected URLs or address classes, expected behavior,
 
 ## Security model
 
-PageNectar rejects non-HTTP protocols and private-network destinations by default. Redirects are validated before they are followed, and Lightpanda receives its private-network blocking option. `--allow-private` intentionally disables this boundary and should not be enabled for untrusted agent input.
+ReadLens rejects non-HTTP protocols and private-network destinations by default. Redirects are validated before they are followed, and Lightpanda receives its private-network blocking option. `--allow-private` intentionally disables this boundary and should not be enabled for untrusted agent input.
 

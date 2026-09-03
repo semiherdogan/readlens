@@ -1,4 +1,4 @@
-export type PageNectarErrorCode =
+export type ReadLensErrorCode =
   | "INVALID_URL"
   | "PRIVATE_NETWORK"
   | "HTTP_STATUS"
@@ -13,18 +13,19 @@ export type PageNectarErrorCode =
   | "EXTRACTION_FAILED"
   | "ALTERNATE_SOURCE_FAILED";
 
-export class PageNectarError extends Error {
-  readonly code: PageNectarErrorCode;
+export class ReadLensError extends Error {
+  readonly code: ReadLensErrorCode;
 
-  constructor(code: PageNectarErrorCode, message: string, options?: ErrorOptions) {
+  constructor(code: ReadLensErrorCode, message: string, options?: ErrorOptions) {
     super(message, options);
-    this.name = "PageNectarError";
+    this.name = "ReadLensError";
     this.code = code;
   }
 }
 
+
 export function errorPayload(error: unknown): { code: string; message: string } {
-  if (error instanceof PageNectarError) {
+  if (error instanceof ReadLensError) {
     return { code: error.code, message: error.message };
   }
   if (error instanceof Error) {

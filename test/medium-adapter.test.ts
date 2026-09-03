@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { createMediumFeedFetcher } from "../src/fetchers/medium-feed.js";
+import { createMediumAdapter } from "../src/adapters/medium.js";
 
-describe("createMediumFeedFetcher", () => {
+describe("createMediumAdapter", () => {
   it("returns the matching article from a Medium author feed", async () => {
     const feedFetcher = {
       fetch: vi.fn().mockResolvedValue({
@@ -18,7 +18,7 @@ describe("createMediumFeedFetcher", () => {
         </item></channel></rss>`
       })
     };
-    const fetcher = createMediumFeedFetcher(feedFetcher);
+    const fetcher = createMediumAdapter(feedFetcher);
     const url = new URL("https://writer.medium.com/article-id");
 
     expect(fetcher.supports(url)).toBe(true);
@@ -30,7 +30,7 @@ describe("createMediumFeedFetcher", () => {
   });
 
   it("supports Medium author URL variants only", () => {
-    const fetcher = createMediumFeedFetcher({ fetch: vi.fn() });
+    const fetcher = createMediumAdapter({ fetch: vi.fn() });
 
     expect(fetcher.supports(new URL("https://writer.medium.com/post"))).toBe(true);
     expect(fetcher.supports(new URL("https://medium.com/@writer/post"))).toBe(true);
@@ -48,7 +48,7 @@ describe("createMediumFeedFetcher", () => {
         html: "<rss><channel><item><title>No link</title></item><item><link>not a URL</link></item></channel></rss>"
       })
     };
-    const fetcher = createMediumFeedFetcher(feedFetcher);
+    const fetcher = createMediumAdapter(feedFetcher);
 
     await expect(fetcher.fetch(new URL("https://example.com/post"))).rejects.toThrow(
       "Unsupported Medium URL"
@@ -67,7 +67,7 @@ describe("createMediumFeedFetcher", () => {
         html: "<rss><channel><item><link>https://writer.medium.com/post</link></item></channel></rss>"
       })
     };
-    const fetcher = createMediumFeedFetcher(feedFetcher);
+    const fetcher = createMediumAdapter(feedFetcher);
 
     await expect(fetcher.fetch(new URL("https://writer.medium.com/post"))).rejects.toThrow(
       "Medium feed item has no content"
@@ -86,7 +86,7 @@ describe("createMediumFeedFetcher", () => {
         </item></channel></rss>`
       })
     };
-    const fetcher = createMediumFeedFetcher(feedFetcher);
+    const fetcher = createMediumAdapter(feedFetcher);
 
     const result = await fetcher.fetch(new URL("https://medium.com/@writer/post"));
 

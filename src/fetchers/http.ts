@@ -1,6 +1,6 @@
 import { validatePublicUrl } from "../core/security.js";
 import type { FetchedPage, PageFetcher } from "../core/types.js";
-import { PageNectarError } from "../core/errors.js";
+import { ReadLensError } from "../core/errors.js";
 
 type FetchFunction = (input: URL, init: RequestInit) => Promise<Response>;
 
@@ -18,7 +18,7 @@ const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
 async function readLimited(response: Response, maxBytes: number): Promise<string> {
   const declaredLength = Number(response.headers.get("content-length"));
   if (Number.isFinite(declaredLength) && declaredLength > maxBytes) {
-    throw new PageNectarError("RESPONSE_TOO_LARGE", `Response exceeds ${maxBytes} bytes`);
+    throw new ReadLensError("RESPONSE_TOO_LARGE", `Response exceeds ${maxBytes} bytes`);
   }
   if (!response.body) return "";
 
@@ -33,7 +33,7 @@ async function readLimited(response: Response, maxBytes: number): Promise<string
     size += value.byteLength;
     if (size > maxBytes) {
       await reader.cancel();
-      throw new PageNectarError("RESPONSE_TOO_LARGE", `Response exceeds ${maxBytes} bytes`);
+      throw new ReadLensError("RESPONSE_TOO_LARGE", `Response exceeds ${maxBytes} bytes`);
     }
     text += decoder.decode(value, { stream: true });
   }
@@ -63,27 +63,27 @@ export function createHttpFetcher(options: HttpFetcherOptions = {}): PageFetcher
           response = await fetchFunction(url, {
             headers: {
               accept: acceptedContentTypes.join(","),
-              "user-agent": "PageNectar/0.1"
+              "user-agent": "ReadLens/0.1"
             },
             redirect: "manual",
             signal: AbortSignal.timeout(timeoutMs)
           });
         } catch (error) {
           if (error instanceof Error && error.name === "TimeoutError") {
-            throw new PageNectarError("FETCH_TIMEOUT", `Request timed out after ${timeoutMs} ms`, {
+            throw new ReadLensError("FETCH_TIMEOUT", `Request timed out after ${timeoutMs} ms`, {
               cause: error
             });
           }
-          throw new PageNectarError("FETCH_FAILED", "HTTP request failed", { cause: error });
+          throw new ReadLensError("FETCH_FAILED", "HTTP request failed", { cause: error });
         }
 
         if (REDIRECT_STATUSES.has(response.status)) {
           const location = response.headers.get("location");
           if (!location) {
-            throw new PageNectarError("REDIRECT_ERROR", "Redirect response has no location header");
+            throw new ReadLensError("REDIRECT_ERROR", "Redirect response has no location header");
           }
           if (redirectCount === maxRedirects) {
-            throw new PageNectarError("REDIRECT_ERROR", "Too many redirects");
+            throw new ReadLensError("REDIRECT_ERROR", "Too many redirects");
           }
           url = await validateUrl(new URL(location, url).href);
           redirectCount += 1;
@@ -91,14 +91,14 @@ export function createHttpFetcher(options: HttpFetcherOptions = {}): PageFetcher
         }
 
         if (!response.ok) {
-          throw new PageNectarError(
+          throw new ReadLensError(
             "HTTP_STATUS",
             `HTTP request failed with status ${response.status}`
           );
         }
         const contentType = response.headers.get("content-type")?.toLowerCase() ?? "";
         if (!acceptedContentTypes.some((type) => contentType.includes(type))) {
-          throw new PageNectarError(
+          throw new ReadLensError(
             "UNSUPPORTED_CONTENT_TYPE",
             `Unsupported content type: ${contentType || "unknown"}`
           );

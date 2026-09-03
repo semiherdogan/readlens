@@ -1,9 +1,9 @@
 # MCP setup
 
-PageNectar runs as a local stdio MCP server. The launch command is:
+ReadLens runs as a local stdio MCP server. The launch command is:
 
 ```sh
-npx -y pagenectar@latest mcp
+npx -y readlens@latest mcp
 ```
 
 For reproducible installations, replace `latest` with an exact version such as `0.1.0`.
@@ -11,7 +11,7 @@ For reproducible installations, replace `latest` with an exact version such as `
 ## Codex
 
 ```sh
-codex mcp add pagenectar -- npx -y pagenectar@latest mcp
+codex mcp add readlens -- npx -y readlens@latest mcp
 ```
 
 Run `codex mcp list` to verify the configuration. The ChatGPT desktop app, Codex CLI, and Codex IDE extension share this MCP configuration. See the [official Codex MCP documentation](https://developers.openai.com/codex/mcp).
@@ -19,7 +19,7 @@ Run `codex mcp list` to verify the configuration. The ChatGPT desktop app, Codex
 ## Claude Code
 
 ```sh
-claude mcp add pagenectar -- npx -y pagenectar@latest mcp
+claude mcp add readlens -- npx -y readlens@latest mcp
 ```
 
 Run `/mcp` in Claude Code to verify that the server and its tools are available.
@@ -32,15 +32,15 @@ OpenCode provides an interactive setup command:
 opencode mcp add
 ```
 
-Choose a local server, name it `pagenectar`, and use `npx -y pagenectar@latest mcp` as its command. Alternatively, add PageNectar directly to `opencode.json`:
+Choose a local server, name it `readlens`, and use `npx -y readlens@latest mcp` as its command. Alternatively, add ReadLens directly to `opencode.json`:
 
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
   "mcp": {
-    "pagenectar": {
+    "readlens": {
       "type": "local",
-      "command": ["npx", "-y", "pagenectar@latest", "mcp"],
+      "command": ["npx", "-y", "readlens@latest", "mcp"],
       "enabled": true
     }
   }
@@ -54,9 +54,9 @@ Run `opencode mcp list` to check the connection. See the [official OpenCode MCP 
 ```json
 {
   "mcpServers": {
-    "pagenectar": {
+    "readlens": {
       "command": "npx",
-      "args": ["-y", "pagenectar@latest", "mcp"]
+      "args": ["-y", "readlens@latest", "mcp"]
     }
   }
 }

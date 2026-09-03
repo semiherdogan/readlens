@@ -36,8 +36,9 @@ const outputSchema = z.object({
   truncated: z.boolean()
 });
 
-export function createPageNectarMcpServer(readPage: ReadPage): McpServer {
-  const server = new McpServer({ name: "pagenectar", version: "0.1.0" });
+export function createReadLensMcpServer(readPage: ReadPage): McpServer {
+  const server = new McpServer({ name: "readlens", version: "0.1.0" });
+
 
   server.registerTool(
     "read_page",
@@ -72,3 +73,4 @@ export function createPageNectarMcpServer(readPage: ReadPage): McpServer {
 
   return server;
 }
+

@@ -12,8 +12,8 @@ type CliDependencies = {
 };
 
 const USAGE = `Usage:
-  pagenectar read <url> [--json] [--render auto|always|never] [--lightpanda <path>] [--max-chars 30000]
-  pagenectar mcp [--lightpanda <path>] [--allow-private] [--no-cache] [--cache-ttl 3600]
+  readlens read <url> [--json] [--render auto|always|never] [--lightpanda <path>] [--max-chars 30000]
+  readlens mcp [--lightpanda <path>] [--allow-private] [--no-cache] [--cache-ttl 3600]
 `;
 
 function messageFrom(error: unknown): string {

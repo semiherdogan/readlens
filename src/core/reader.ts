@@ -1,20 +1,23 @@
 import { extractContent } from "../extractors/extract.js";
 import { validatePublicUrl } from "./security.js";
-import { PageNectarError } from "./errors.js";
+import { ReadLensError } from "./errors.js";
 import type {
-  AlternatePageFetcher,
+  ExtractedContent,
   FetchedPage,
   PageFetcher,
   PageCache,
   ReadPageInput,
   ReadPageResult,
-  RenderMode
+  RenderMode,
+  SiteAdapter
 } from "./types.js";
 
 export type ReaderDependencies = {
   httpFetcher: PageFetcher;
   renderer?: PageFetcher;
-  alternateFetchers?: AlternatePageFetcher[];
+  siteAdapters?: SiteAdapter[];
+  /** @deprecated use siteAdapters */
+  alternateFetchers?: SiteAdapter[];
   cache?: PageCache;
   cacheTtlMs?: number;
   validateUrl?: (url: string) => Promise<URL>;
@@ -40,41 +43,69 @@ function shouldRender(content: string): boolean {
   return content.length < 200;
 }
 
-async function fetchAuto(url: URL, dependencies: ReaderDependencies): Promise<FetchedPage> {
+function siteAdapters(dependencies: ReaderDependencies): SiteAdapter[] {
+  return dependencies.siteAdapters ?? dependencies.alternateFetchers ?? [];
+}
+
+function supportedAdapter(url: URL, dependencies: ReaderDependencies): SiteAdapter | undefined {
+  return siteAdapters(dependencies).find((adapter) => adapter.supports(url));
+}
+
+async function fetchWithSiteAdapter(
+  url: URL,
+  dependencies: ReaderDependencies
+): Promise<FetchedPage | undefined> {
+  return supportedAdapter(url, dependencies)?.fetch(url);
+}
+
+type AutoFetchResult = { page: FetchedPage; usedSiteAdapter: boolean };
+
+async function fetchAuto(url: URL, dependencies: ReaderDependencies): Promise<AutoFetchResult> {
   try {
-    return await dependencies.httpFetcher.fetch(url);
+    return { page: await dependencies.httpFetcher.fetch(url), usedSiteAdapter: false };
   } catch (httpError) {
-    const alternate = dependencies.alternateFetchers?.find((fetcher) => fetcher.supports(url));
-    if (alternate) {
-      try {
-        return await alternate.fetch(url);
-      } catch (error) {
-        if (!dependencies.renderer) {
-          throw new PageNectarError(
-            "ALTERNATE_SOURCE_FAILED",
-            "Alternate content source failed",
-            { cause: error }
-          );
-        }
+    try {
+      const adaptedPage = await fetchWithSiteAdapter(url, dependencies);
+      if (adaptedPage) return { page: adaptedPage, usedSiteAdapter: true };
+    } catch (error) {
+      if (!dependencies.renderer) {
+        throw new ReadLensError(
+          "ALTERNATE_SOURCE_FAILED",
+          "Alternate content source failed",
+          { cause: error }
+        );
       }
     }
-    if (dependencies.renderer) return dependencies.renderer.fetch(url);
+    if (dependencies.renderer) {
+      return { page: await dependencies.renderer.fetch(url), usedSiteAdapter: false };
+    }
     throw httpError;
   }
 }
 
-function assertUsefulContent(title: string | null, content: string): void {
+function isBlockedContent(title: string | null, content: string): boolean {
   const normalizedTitle = title?.toLowerCase() ?? "";
   const normalizedContent = content.toLowerCase();
-  const blocked =
+  return (
     normalizedTitle.includes("you have been blocked") ||
     normalizedTitle === "access denied" ||
     normalizedTitle === "just a moment..." ||
-    normalizedContent.includes("cloudflare ray id");
-  if (blocked) throw new PageNectarError("BLOCKED", "The site returned a bot-block page");
-  if (!content.trim()) {
-    throw new PageNectarError("EXTRACTION_FAILED", "No readable content was extracted");
+    normalizedContent.includes("cloudflare ray id")
+  );
+}
+
+function assertUsefulContent(title: string | null, content: string): void {
+  if (isBlockedContent(title, content)) {
+    throw new ReadLensError("BLOCKED", "The site returned a bot-block page");
   }
+  if (!content.trim()) {
+    throw new ReadLensError("EXTRACTION_FAILED", "No readable content was extracted");
+  }
+}
+
+function shouldTrySiteAdapter(page: FetchedPage, extracted: ExtractedContent): boolean {
+  return page.renderer !== "lightpanda" &&
+    (isBlockedContent(extracted.title, extracted.content) || shouldRender(extracted.content));
 }
 
 export function createReader(dependencies: ReaderDependencies) {
@@ -96,17 +127,32 @@ export function createReader(dependencies: ReaderDependencies) {
     }
 
     let page: FetchedPage;
+    let usedSiteAdapter = false;
     if (render === "always") {
       if (!dependencies.renderer) throw new Error("Lightpanda renderer is not available");
       page = await dependencies.renderer.fetch(url);
     } else if (render === "auto") {
-      page = await fetchAuto(url, dependencies);
+      ({ page, usedSiteAdapter } = await fetchAuto(url, dependencies));
     } else {
       page = await dependencies.httpFetcher.fetch(url);
     }
 
     await validateUrl(page.finalUrl);
     let extracted = extractContent(page.html, page.finalUrl, input.format ?? "text");
+
+    if (render === "auto" && !usedSiteAdapter && shouldTrySiteAdapter(page, extracted)) {
+      try {
+        const adaptedPage = await fetchWithSiteAdapter(url, dependencies);
+        if (adaptedPage) {
+          page = adaptedPage;
+          usedSiteAdapter = true;
+          await validateUrl(page.finalUrl);
+          extracted = extractContent(page.html, page.finalUrl, input.format ?? "text");
+        }
+      } catch {
+        // Renderer fallback or the final extraction assertion will report the page state.
+      }
+    }
 
     if (
       render === "auto" &&

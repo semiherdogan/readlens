@@ -181,6 +181,35 @@ describe("createReader", () => {
     expect(result.title).toBe("A focused article");
   });
 
+  it("uses a supported site adapter when HTTP content is blocked", async () => {
+    const adapter = {
+      supports: vi.fn().mockReturnValue(true),
+      fetch: vi.fn().mockResolvedValue({
+        finalUrl: "https://writer.medium.com/article",
+        html: articleHtml,
+        status: 200,
+        renderer: "http" as const
+      })
+    };
+    const readPage = createReader({
+      httpFetcher: {
+        fetch: vi.fn().mockResolvedValue({
+          finalUrl: "https://writer.medium.com/article",
+          html: "<html><head><title>Just a moment...</title></head><body><main>Checking your browser</main></body></html>",
+          status: 200,
+          renderer: "http" as const
+        })
+      },
+      siteAdapters: [adapter],
+      validateUrl: async (url) => new URL(url)
+    });
+
+    const result = await readPage({ url: "https://writer.medium.com/article" });
+
+    expect(adapter.fetch).toHaveBeenCalledOnce();
+    expect(result.title).toBe("A focused article");
+  });
+
   it("returns a cached result before fetching", async () => {
     const cached = {
       url: "https://example.com/",

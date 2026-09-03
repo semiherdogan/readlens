@@ -2,9 +2,9 @@ import { Client } from "@modelcontextprotocol/client";
 import { InMemoryTransport } from "@modelcontextprotocol/server";
 import { describe, expect, it, vi } from "vitest";
 
-import { createPageNectarMcpServer } from "../src/mcp/server.js";
+import { createReadLensMcpServer } from "../src/mcp/server.js";
 import type { ReadPageResult } from "../src/core/types.js";
-import { PageNectarError } from "../src/core/errors.js";
+import { ReadLensError } from "../src/core/errors.js";
 
 const pageResult: ReadPageResult = {
   url: "https://example.com/",
@@ -23,11 +23,11 @@ const pageResult: ReadPageResult = {
   truncated: false
 };
 
-describe("createPageNectarMcpServer", () => {
+describe("createReadLensMcpServer", () => {
   it("exposes only read_page and returns structured content", async () => {
     const readPage = vi.fn().mockResolvedValue(pageResult);
-    const server = createPageNectarMcpServer(readPage);
-    const client = new Client({ name: "pagenectar-test", version: "1.0.0" });
+    const server = createReadLensMcpServer(readPage);
+    const client = new Client({ name: "readlens-test", version: "1.0.0" });
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
 
     await server.connect(serverTransport);
@@ -55,10 +55,10 @@ describe("createPageNectarMcpServer", () => {
   });
 
   it("returns typed tool errors", async () => {
-    const server = createPageNectarMcpServer(
-      vi.fn().mockRejectedValue(new PageNectarError("BLOCKED", "Blocked page"))
+    const server = createReadLensMcpServer(
+      vi.fn().mockRejectedValue(new ReadLensError("BLOCKED", "Blocked page"))
     );
-    const client = new Client({ name: "pagenectar-test", version: "1.0.0" });
+    const client = new Client({ name: "readlens-test", version: "1.0.0" });
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
     await server.connect(serverTransport);
     await client.connect(clientTransport);

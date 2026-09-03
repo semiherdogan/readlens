@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { PageNectarError, errorPayload } from "../src/core/errors.js";
+import { ReadLensError, errorPayload } from "../src/core/errors.js";
 
 describe("errorPayload", () => {
-  it("preserves public PageNectar error codes", () => {
-    expect(errorPayload(new PageNectarError("BLOCKED", "Blocked"))).toEqual({
+  it("preserves public ReadLens error codes", () => {
+    expect(errorPayload(new ReadLensError("BLOCKED", "Blocked"))).toEqual({
       code: "BLOCKED",
       message: "Blocked"
     });

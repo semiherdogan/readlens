@@ -1,0 +1,34 @@
+<svg width="1774" height="887" viewBox="0 0 1774 887" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(887 300) rotate(90) scale(520 900)">
+      <stop stop-color="#7DD3FC" stop-opacity="0.45"/>
+      <stop offset="0.48" stop-color="#38BDF8" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#020617" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="card" x1="412" y1="206" x2="1362" y2="681" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8FAFC"/>
+      <stop offset="1" stop-color="#DBEAFE"/>
+    </linearGradient>
+    <linearGradient id="lens" x1="681" y1="299" x2="1093" y2="587" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0EA5E9"/>
+      <stop offset="1" stop-color="#6366F1"/>
+    </linearGradient>
+  </defs>
+  <rect width="1774" height="887" fill="#020617"/>
+  <rect width="1774" height="887" fill="url(#glow)"/>
+  <circle cx="246" cy="151" r="5" fill="#E0F2FE" opacity="0.7"/>
+  <circle cx="1518" cy="169" r="6" fill="#E0E7FF" opacity="0.55"/>
+  <circle cx="1578" cy="704" r="4" fill="#BAE6FD" opacity="0.5"/>
+  <circle cx="314" cy="709" r="4" fill="#C7D2FE" opacity="0.55"/>
+  <rect x="363" y="188" width="1048" height="511" rx="48" fill="url(#card)" opacity="0.96"/>
+  <rect x="414" y="251" width="520" height="28" rx="14" fill="#94A3B8" opacity="0.45"/>
+  <rect x="414" y="319" width="392" height="24" rx="12" fill="#CBD5E1"/>
+  <rect x="414" y="371" width="498" height="18" rx="9" fill="#CBD5E1"/>
+  <rect x="414" y="415" width="448" height="18" rx="9" fill="#CBD5E1"/>
+  <rect x="414" y="459" width="516" height="18" rx="9" fill="#CBD5E1"/>
+  <rect x="414" y="503" width="366" height="18" rx="9" fill="#CBD5E1"/>
+  <circle cx="1054" cy="412" r="116" stroke="url(#lens)" stroke-width="34"/>
+  <path d="M1137 496L1245 604" stroke="#4F46E5" stroke-width="38" stroke-linecap="round"/>
+  <text x="887" y="795" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="104" font-weight="800" fill="#F8FAFC">ReadLens</text>
+  <text x="887" y="850" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="34" font-weight="500" fill="#BAE6FD">Clean web reading for AI agents</text>
+</svg>

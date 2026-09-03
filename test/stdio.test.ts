@@ -7,13 +7,13 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@modelcontextprotocol/server/stdio", () => ({ serveStdio: mocks.serveStdio }));
 vi.mock("../src/mcp/server.js", () => ({
-  createPageNectarMcpServer: mocks.createServer
+  createReadLensMcpServer: mocks.createServer
 }));
 
 import { startMcpStdio } from "../src/mcp/stdio.js";
 
 describe("startMcpStdio", () => {
-  it("serves a PageNectar server factory and reports transport errors to stderr", () => {
+  it("serves a ReadLens server factory and reports transport errors to stderr", () => {
     const readPage = vi.fn();
     const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
 

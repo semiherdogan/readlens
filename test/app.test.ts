@@ -4,7 +4,7 @@ const mocks = vi.hoisted(() => ({
   createReader: vi.fn(),
   createHttpFetcher: vi.fn(),
   createLightpandaFetcher: vi.fn(),
-  createMediumFeedFetcher: vi.fn(),
+  createMediumAdapter: vi.fn(),
   createFilePageCache: vi.fn()
 }));
 
@@ -13,8 +13,8 @@ vi.mock("../src/fetchers/http.js", () => ({ createHttpFetcher: mocks.createHttpF
 vi.mock("../src/fetchers/lightpanda.js", () => ({
   createLightpandaFetcher: mocks.createLightpandaFetcher
 }));
-vi.mock("../src/fetchers/medium-feed.js", () => ({
-  createMediumFeedFetcher: mocks.createMediumFeedFetcher
+vi.mock("../src/adapters/medium.js", () => ({
+  createMediumAdapter: mocks.createMediumAdapter
 }));
 vi.mock("../src/cache/file-cache.js", () => ({
   createFilePageCache: mocks.createFilePageCache
@@ -27,7 +27,7 @@ describe("createDefaultReader", () => {
     vi.clearAllMocks();
     mocks.createHttpFetcher.mockReturnValue({ fetch: vi.fn() });
     mocks.createLightpandaFetcher.mockReturnValue({ fetch: vi.fn() });
-    mocks.createMediumFeedFetcher.mockReturnValue({ supports: vi.fn(), fetch: vi.fn() });
+    mocks.createMediumAdapter.mockReturnValue({ supports: vi.fn(), fetch: vi.fn() });
     mocks.createFilePageCache.mockReturnValue({ get: vi.fn(), set: vi.fn() });
     mocks.createReader.mockReturnValue(vi.fn());
   });
@@ -38,7 +38,7 @@ describe("createDefaultReader", () => {
       lightpandaExecutable: "/bin/lightpanda",
       cacheEnabled: true,
       cacheTtlMs: 5000,
-      cacheDirectory: "/tmp/pagenectar-cache"
+      cacheDirectory: "/tmp/readlens-cache"
     });
 
     expect(readPage).toBe(mocks.createReader.mock.results[0]!.value);
@@ -47,7 +47,7 @@ describe("createDefaultReader", () => {
       executable: "/bin/lightpanda"
     });
     expect(mocks.createFilePageCache).toHaveBeenCalledWith({
-      directory: "/tmp/pagenectar-cache"
+      directory: "/tmp/readlens-cache"
     });
     const dependencies = mocks.createReader.mock.calls[0]![0];
     expect(dependencies.cacheTtlMs).toBe(5000);
@@ -83,7 +83,7 @@ describe("createDefaultReader", () => {
     dependencies = mocks.createReader.mock.calls[1]![0];
     expect(dependencies.cache).toBeDefined();
     expect(mocks.createFilePageCache).toHaveBeenLastCalledWith({
-      directory: expect.stringContaining("/.cache/pagenectar")
+      directory: expect.stringContaining("/.cache/readlens")
     });
   });
 });

@@ -1,7 +1,7 @@
 import { execFile } from "node:child_process";
 
 import type { FetchedPage, PageFetcher } from "../core/types.js";
-import { PageNectarError } from "../core/errors.js";
+import { ReadLensError } from "../core/errors.js";
 
 type RunOptions = {
   encoding: "utf8";
@@ -43,14 +43,14 @@ function isExecutableMissing(error: unknown): boolean {
 
 function parseOutput(stdout: string): LightpandaOutput {
   if (!stdout.trim()) {
-    throw new PageNectarError("RENDER_FAILED", "Lightpanda returned an empty document");
+    throw new ReadLensError("RENDER_FAILED", "Lightpanda returned an empty document");
   }
 
   let output: unknown;
   try {
     output = JSON.parse(stdout);
   } catch {
-    throw new PageNectarError("RENDER_FAILED", "Lightpanda returned invalid JSON");
+    throw new ReadLensError("RENDER_FAILED", "Lightpanda returned invalid JSON");
   }
 
   if (
@@ -63,7 +63,7 @@ function parseOutput(stdout: string): LightpandaOutput {
     typeof output.http_status !== "number" ||
     typeof output.content !== "string"
   ) {
-    throw new PageNectarError("RENDER_FAILED", "Lightpanda returned an invalid result");
+    throw new ReadLensError("RENDER_FAILED", "Lightpanda returned an invalid result");
   }
 
   return output as LightpandaOutput;
@@ -113,13 +113,13 @@ export function createLightpandaFetcher(options: LightpandaFetcherOptions = {}):
       } catch (error) {
         if (isExecutableMissing(error)) {
           const location = executable === "lightpanda" ? "on PATH" : `at ${executable}`;
-          throw new PageNectarError(
+          throw new ReadLensError(
             "LIGHTPANDA_NOT_FOUND",
             `Lightpanda was not found ${location}. Install it from https://lightpanda.io/docs/quickstart, provide its executable with --lightpanda <path>, or use --render never.`,
             { cause: error }
           );
         }
-        throw new PageNectarError("RENDER_FAILED", "Lightpanda execution failed", {
+        throw new ReadLensError("RENDER_FAILED", "Lightpanda execution failed", {
           cause: error
         });
       }

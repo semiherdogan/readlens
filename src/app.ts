@@ -3,7 +3,7 @@ import { validatePublicUrl } from "./core/security.js";
 import type { ReadPage } from "./core/types.js";
 import { createHttpFetcher } from "./fetchers/http.js";
 import { createLightpandaFetcher } from "./fetchers/lightpanda.js";
-import { createMediumFeedFetcher } from "./fetchers/medium-feed.js";
+import { createMediumAdapter } from "./adapters/medium.js";
 import { createFilePageCache } from "./cache/file-cache.js";
 import { homedir } from "node:os";
 import { join } from "node:path";
@@ -25,7 +25,7 @@ export function createDefaultReader(options: AppOptions): ReadPage {
   };
 
   const httpFetcher = createHttpFetcher({ validateUrl });
-  const mediumFeedFetcher = createMediumFeedFetcher(
+  const mediumAdapter = createMediumAdapter(
     createHttpFetcher({
       validateUrl,
       acceptedContentTypes: ["text/xml", "application/xml", "application/rss+xml"]
@@ -33,12 +33,12 @@ export function createDefaultReader(options: AppOptions): ReadPage {
   );
   const cacheDirectory =
     options.cacheDirectory ??
-    join(process.env.XDG_CACHE_HOME ?? join(homedir(), ".cache"), "pagenectar");
+    join(process.env.XDG_CACHE_HOME ?? join(homedir(), ".cache"), "readlens");
 
   return createReader({
     httpFetcher,
     renderer: createLightpandaFetcher(lightpandaOptions),
-    alternateFetchers: [mediumFeedFetcher],
+    siteAdapters: [mediumAdapter],
     ...(options.cacheEnabled
       ? {
           cache: createFilePageCache({ directory: cacheDirectory }),
