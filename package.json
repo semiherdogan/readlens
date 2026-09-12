@@ -1,5 +1,5 @@
 {
-  "name": "readlens",
+  "name": "@semiherdogan/readlens",
   "version": "0.1.0",
   "description": "Clean web reading for AI agents.",
   "repository": {

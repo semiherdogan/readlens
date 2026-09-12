@@ -12,7 +12,7 @@ ReadLens can run without Lightpanda when `--render never` is used. Telemetry is 
 Run ReadLens without a permanent installation:
 
 ```sh
-npx -y readlens@latest read https://example.com
+npx -y @semiherdogan/readlens@latest read https://example.com
 ```
 
 For reproducible installations, replace `latest` with an exact version such as `0.1.0`.
@@ -20,7 +20,7 @@ For reproducible installations, replace `latest` with an exact version such as `
 ## Install globally
 
 ```sh
-npm install --global readlens@latest
+npm install --global @semiherdogan/readlens@latest
 readlens read https://example.com
 ```
 
