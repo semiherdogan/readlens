@@ -33,7 +33,7 @@ Lightpanda is optional when `--render never` is used. See the [installation guid
 ## Quick start
 
 ```sh
-npx -y @semiherdogan/readlens@latest read https://example.com
+npx -y @hasansemih/readlens@latest read https://example.com
 ```
 
 ## CLI
@@ -88,8 +88,8 @@ Cache files are stored under `$XDG_CACHE_HOME/readlens` or `~/.cache/readlens`.
 ReadLens runs as a local stdio MCP server:
 
 ```sh
-codex mcp add readlens -- npx -y @semiherdogan/readlens@latest mcp
-claude mcp add readlens -- npx -y @semiherdogan/readlens@latest mcp
+codex mcp add readlens -- npx -y @hasansemih/readlens@latest mcp
+claude mcp add readlens -- npx -y @hasansemih/readlens@latest mcp
 ```
 
 See the [MCP setup guide](docs/mcp.md) for Codex, Claude Code, Claude Desktop, OpenCode, and JSON-based clients.

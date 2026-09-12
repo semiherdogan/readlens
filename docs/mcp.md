@@ -3,7 +3,7 @@
 ReadLens runs as a local stdio MCP server. The launch command is:
 
 ```sh
-npx -y @semiherdogan/readlens@latest mcp
+npx -y @hasansemih/readlens@latest mcp
 ```
 
 The MCP tool defaults to `format = "text"`, which returns plain readable content without link URLs. Agents should request `format = "markdown"` when links, citations, or reference sections need to remain actionable.
@@ -13,7 +13,7 @@ For reproducible installations, replace `latest` with an exact version such as `
 ## Codex
 
 ```sh
-codex mcp add readlens -- npx -y @semiherdogan/readlens@latest mcp
+codex mcp add readlens -- npx -y @hasansemih/readlens@latest mcp
 ```
 
 Run `codex mcp list` to verify the configuration. The ChatGPT desktop app, Codex CLI, and Codex IDE extension share this MCP configuration. See the [official Codex MCP documentation](https://developers.openai.com/codex/mcp).
@@ -21,7 +21,7 @@ Run `codex mcp list` to verify the configuration. The ChatGPT desktop app, Codex
 ## Claude Code
 
 ```sh
-claude mcp add readlens -- npx -y @semiherdogan/readlens@latest mcp
+claude mcp add readlens -- npx -y @hasansemih/readlens@latest mcp
 ```
 
 Run `/mcp` in Claude Code to verify that the server and its tools are available.
@@ -34,7 +34,7 @@ OpenCode provides an interactive setup command:
 opencode mcp add
 ```
 
-Choose a local server, name it `readlens`, and use `npx -y @semiherdogan/readlens@latest mcp` as its command. Alternatively, add ReadLens directly to `opencode.json`:
+Choose a local server, name it `readlens`, and use `npx -y @hasansemih/readlens@latest mcp` as its command. Alternatively, add ReadLens directly to `opencode.json`:
 
 ```json
 {
@@ -42,7 +42,7 @@ Choose a local server, name it `readlens`, and use `npx -y @semiherdogan/readlen
   "mcp": {
     "readlens": {
       "type": "local",
-      "command": ["npx", "-y", "@semiherdogan/readlens@latest", "mcp"],
+      "command": ["npx", "-y", "@hasansemih/readlens@latest", "mcp"],
       "enabled": true
     }
   }
@@ -58,7 +58,7 @@ Run `opencode mcp list` to check the connection. See the [official OpenCode MCP 
   "mcpServers": {
     "readlens": {
       "command": "npx",
-      "args": ["-y", "@semiherdogan/readlens@latest", "mcp"]
+      "args": ["-y", "@hasansemih/readlens@latest", "mcp"]
     }
   }
 }
